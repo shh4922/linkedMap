@@ -111,7 +111,6 @@ public class DummyTest {
         member.setPassword("111111");
         member.setUsername("현호");
 
-
         Member member2 = new Member();
         member2.setEmail("test2@test.com");
         member2.setPassword("111111");
@@ -132,10 +131,9 @@ public class DummyTest {
         memberRepository.save(member3);
         memberRepository.save(member4);
 
-        Member findMember = memberRepository.findById(1L).orElseThrow();
         Category category = new Category();
         category.setName("빵맛집");
-        category.setOwner(findMember.getId());
+        category.setOwner(member.getId());
         categoryRepository.save(category);
 
         CategoryUser categoryUser = new CategoryUser();
@@ -164,7 +162,53 @@ public class DummyTest {
         categoryUserRepository.save(categoryUser4);
 
         List<Member> memberList = categoryUserRepository.findMembersByCategoryId(category.getId());
-        System.out.println(memberList);
+    }
 
+    @Test
+    public void createCategoryAndSaveMember() {
+        Member findMember = memberRepository.findById(2L).orElseThrow();
+        Category category = new Category();
+        category.setName("개쩌는 맛도리 집");
+        category.setOwner(findMember.getId());
+        categoryRepository.save(category);
+
+        CategoryUser categoryUser = new CategoryUser();
+        categoryUser.setCategory(category);
+        categoryUser.setMember(findMember);
+        categoryUser.setOwner(findMember);
+        categoryUserRepository.save(categoryUser);
+
+        Member findMember3 = memberRepository.findById(3L).orElseThrow();
+        Member findMember4 = memberRepository.findById(4L).orElseThrow();
+
+        CategoryUser categoryUser2 = new CategoryUser();
+        categoryUser2.setCategory(category);
+        categoryUser2.setMember(findMember3);
+        categoryUser2.setOwner(findMember);
+        categoryUserRepository.save(categoryUser2);
+
+        CategoryUser categoryUser3 = new CategoryUser();
+        categoryUser3.setCategory(category);
+        categoryUser3.setMember(findMember4);
+        categoryUser3.setOwner(findMember);
+        categoryUserRepository.save(categoryUser3);
+
+        List<Member> memberList = categoryUserRepository.findMembersByCategoryId(category.getId());
+        System.out.println(memberList);
+    }
+
+    @Test
+    public void 에드가뭔지테스트() {
+        Member member = new Member();
+        member.setEmail("개쩌는이메일@gmail.com");
+        member.setPassword("yammy");
+        member.setUsername("야미맨");
+        memberRepository.save(member);
+
+        Category category = categoryRepository.findById(1L).orElseThrow();
+        List<Member> memberList = categoryUserRepository.findMembersByCategoryId(category.getId());
+        System.out.println(memberList);
+        memberList.add(member);
+        System.out.println(memberList);
     }
 }
