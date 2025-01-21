@@ -17,9 +17,6 @@ import java.util.List;
 public class Member {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
@@ -28,7 +25,6 @@ public class Member {
 
     @Column(nullable = false, unique = true, length = 50)
     private String username;
-
 
 
     @Column(name = "created_at", updatable = false)

@@ -20,7 +20,7 @@ public class Category {
     private String name;
 
     @Column(name = "owner_id", nullable = false)
-    private Long owner;
+    private String owner;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

@@ -2,6 +2,7 @@ package com.hyeonho.linkedmap.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,8 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@Table(name = "category_user")
 public class CategoryUser {
 
     @Id
@@ -24,14 +27,14 @@ public class CategoryUser {
     @JoinColumn(name = "owner_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Member owner;
 
-//    @ManyToOne
-//    @Column(name = "invited_state")
-//    private InviteState invitedState;
-
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Member member;
 
+
+//    @Enumerated
+//    @Column(name = "invited_state")
+//    private InviteState invitedState;
 
     @Column(name = "deleted_at", nullable = true)
     private LocalDateTime deletedAt;
