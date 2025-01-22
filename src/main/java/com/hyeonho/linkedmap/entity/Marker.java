@@ -33,7 +33,7 @@ public class Marker {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "create_user", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Member memberId;
 
     @ManyToOne

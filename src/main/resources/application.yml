@@ -10,6 +10,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update  #엔티티 정보를 지우고 다시 생성
+#      ddl-auto: create-drop  #엔티티 정보를 지우고 다시 생성
+
     properties:
       hibernate:
         #show_sql: true  #System.out에 출력
