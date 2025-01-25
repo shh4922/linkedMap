@@ -1,5 +1,6 @@
 package com.hyeonho.linkedmap.entity;
 
+import com.hyeonho.linkedmap.enumlist.InviteState;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,9 +30,9 @@ public class Invite {
     @Column(name = "expire_at", nullable = false)
     private LocalDateTime expireAt; // 파기날짜
 
-//    @Enumerated
-//    @Column(name = "invite_state", nullable = false)
-//    private InviteState inviteState;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "invite_state", nullable = false)
+    private InviteState inviteState;
 
     @PrePersist
     protected void onCreate() {
