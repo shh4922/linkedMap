@@ -1,14 +1,13 @@
 package com.hyeonho.linkedmap.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // 외부에서 기본 생성자 호출 불가
 @Table(name = "categories")
 public class Category {
 
@@ -31,6 +30,12 @@ public class Category {
 
     @Column(name = "deleted_at", nullable = true)
     private LocalDateTime deletedAt;
+
+    @Builder
+    public Category(Member member, String name) {
+        this.owner = member;
+        this.name = name;
+    }
 
     @PrePersist
     protected void onCreate() {
