@@ -1,18 +1,16 @@
 package com.hyeonho.linkedmap.entity;
 
 
+import com.hyeonho.linkedmap.enumlist.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // 외부에서 기본 생성자 호출 불가
 @Table(name = "member")
 public class Member {
 
@@ -36,10 +34,21 @@ public class Member {
     @Column(name = "deleted_at", nullable = true)
     private LocalDateTime deletedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name="role", nullable = false)
+    private Role role;
+
+    @Builder
+    public Member(String email, String password, String username) {
+        this.email = email;
+        this.password = password;
+        this.username = username;
+    }
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.role = Role.ROLE_USER;
     }
     @PreUpdate
     protected void onUpdate() {
