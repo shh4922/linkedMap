@@ -5,6 +5,7 @@ import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.service.MemberService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +20,10 @@ public class MemberController {
     }
 
     @PostMapping("/register")
-    public Member register(RegisterRequest request) {
+    public Member register(@RequestBody RegisterRequest request) {
+        System.out.println(request.getEmail());
+        System.out.println(request.getUsername());
+        System.out.println(request.getPassword());
         Member member = memberService.register(request);
         return member;
     }

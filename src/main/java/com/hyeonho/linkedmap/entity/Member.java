@@ -39,10 +39,11 @@ public class Member {
     private Role role;
 
     @Builder
-    public Member(String email, String password, String username) {
+    public Member(String email, String password, String username, Role role) {
         this.email = email;
         this.password = password;
         this.username = username;
+        this.role = role != null ? role : Role.ROLE_USER;
     }
     @PrePersist
     protected void onCreate() {

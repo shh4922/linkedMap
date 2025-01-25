@@ -2,6 +2,7 @@ package com.hyeonho.linkedmap.service;
 
 import com.hyeonho.linkedmap.data.request.RegisterRequest;
 import com.hyeonho.linkedmap.entity.Member;
+import com.hyeonho.linkedmap.enumlist.Role;
 import com.hyeonho.linkedmap.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ public class MemberService {
     }
 
     public Member register(RegisterRequest member) {
-        Member member1 = new Member(member.getEmail(), member.getPassword(), member.getUsername());
+        Member member1 = new Member(member.getEmail(), member.getPassword(), member.getUsername(), Role.ROLE_USER);
         return memberRepository.save(member1);
     }
 

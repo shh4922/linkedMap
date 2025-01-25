@@ -6,10 +6,7 @@ import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.repository.MemberRepository;
 import com.hyeonho.linkedmap.service.CategoryService;
 import com.hyeonho.linkedmap.service.MemberService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -24,7 +21,7 @@ public class CategoryController {
     }
 
     @GetMapping("categoys/include")
-    public List<Category> getIncludeCategory(Map<String, String> req) {
+    public List<Category> getIncludeCategory(@RequestParam Map<String, String> req) {
         String email = req.get("email");
         if(email.isEmpty()) {
             System.out.println("이메일 비어있음");
@@ -33,7 +30,7 @@ public class CategoryController {
     }
 
     @PostMapping("/category/create")
-    public Category createCategory(CreateCategoryReq request) {
+    public Category createCategory(@RequestBody CreateCategoryReq request) {
         return categoryService.createCategory(request);
     }
 
