@@ -1,6 +1,7 @@
 package com.hyeonho.linkedmap.controller;
 
 import com.hyeonho.linkedmap.data.request.CreateCategoryReq;
+import com.hyeonho.linkedmap.data.request.DeleteCategoryReq;
 import com.hyeonho.linkedmap.entity.Category;
 import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.repository.MemberRepository;
@@ -20,6 +21,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    /** 특정유저가 속한, 카테고리 조회 */
     @GetMapping("categoys/include")
     public List<Category> getIncludeCategory(@RequestParam Map<String, String> req) {
         String email = req.get("email");
@@ -29,9 +31,21 @@ public class CategoryController {
         return categoryService.getIncludeCategory(email);
     }
 
+    /** 카테고리 생성 */
     @PostMapping("/category/create")
     public Category createCategory(@RequestBody CreateCategoryReq request) {
         return categoryService.createCategory(request);
+    }
+
+    /**
+     * 카테고리 삭제
+     * 카테고리 삭제시, CategoryUser에 있는 곳에 deleted_at 시간 또한 업데이트 해주어야함.
+     * @param req
+     * @return
+     */
+    @PostMapping("/category/delete")
+    public Category deleteCategory(@RequestBody DeleteCategoryReq req) {
+        return categoryService.deleteCategory(req);
     }
 
 

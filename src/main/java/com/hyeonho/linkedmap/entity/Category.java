@@ -47,4 +47,7 @@ public class Category {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }
