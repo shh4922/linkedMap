@@ -1,6 +1,7 @@
 package com.hyeonho.linkedmap.service;
 
 import com.hyeonho.linkedmap.data.request.CreateCategoryReq;
+import com.hyeonho.linkedmap.data.request.DeleteCategoryReq;
 import com.hyeonho.linkedmap.entity.Category;
 import com.hyeonho.linkedmap.entity.CategoryUser;
 import com.hyeonho.linkedmap.entity.Member;
@@ -9,6 +10,7 @@ import com.hyeonho.linkedmap.enumlist.InviteState;
 import com.hyeonho.linkedmap.repository.CategoryRepository;
 import com.hyeonho.linkedmap.repository.CategoryUserRepository;
 import com.hyeonho.linkedmap.repository.MemberRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +22,7 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
     private final CategoryUserRepository categoryUserRepository;
+
     public CategoryService(CategoryRepository categoryRepository, MemberRepository memberRepository, CategoryUserRepository categoryUserRepository) {
         this.categoryRepository = categoryRepository;
         this.memberRepository = memberRepository;
@@ -46,8 +49,24 @@ public class CategoryService {
         return savedCategory;
     }
 
+
     public List<Category> getIncludeCategory(String email) {
         return categoryUserRepository.getIncludeCategoryByEmail(email);
+    }
+
+    @Transactional
+    public Category deleteCategory(DeleteCategoryReq req) {
+        Category findCategory = categoryRepository.findById(req.getCategoryId()).orElseThrow();
+
+        if (findCategory.getOwner().getEmail().equals(req.getEmail())) {
+            findCategory.delete(); // deletedAt 필드를 현재 시간으로 업데이트
+            Category category = categoryRepository.save(findCategory); // 변경된 엔티티 저장
+
+            categoryUserRepository.bulkUpdateDeletedAtByCategoryId(category.getId(),category.getDeletedAt());
+            return category;
+        } else {
+            throw new IllegalArgumentException("You are not the owner of this category");
+        }
     }
 
 }
