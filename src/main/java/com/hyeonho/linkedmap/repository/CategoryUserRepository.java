@@ -15,4 +15,8 @@ public interface CategoryUserRepository extends JpaRepository<CategoryUser, Long
 
     @Query("SELECT cu.category FROM CategoryUser cu WHERE cu.member.id = :email")
     List<Category> getIncludeCategoryByEmail(String email);
+
+
+    boolean existsByCategoryIdAndMemberEmail(Long categoryId, String email);
+
 }
