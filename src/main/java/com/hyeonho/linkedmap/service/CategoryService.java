@@ -38,8 +38,8 @@ public class CategoryService {
     public Category createCategory(CreateCategoryReq request) {
         Member member = memberRepository.findById(request.getEmail()).orElseThrow();
         Category category = new Category(member,request.getCategoryName());
+        Category savedCategory = saveCategory(category);
 
-        Category savedCategory = categoryRepository.save(category);
 
         if(savedCategory.equals(category)) {
             CategoryUser categoryUser = new CategoryUser(savedCategory, member, InviteState.INVITE, CategoryUserRole.OWNER);
@@ -47,6 +47,14 @@ public class CategoryService {
         }
 
         return savedCategory;
+    }
+
+    public Category saveCategory(Category category) {
+        return categoryRepository.save(category);
+    }
+
+    public Category findCategoryById(Long categoryId) {
+        return categoryRepository.findById(categoryId).orElseThrow();
     }
 
 
@@ -62,11 +70,12 @@ public class CategoryService {
             findCategory.delete(); // deletedAt 필드를 현재 시간으로 업데이트
             Category category = categoryRepository.save(findCategory); // 변경된 엔티티 저장
 
-            categoryUserRepository.bulkUpdateDeletedAtByCategoryId(category.getId(),category.getDeletedAt());
+//            categoryUserRepository.bulkUpdateDeletedAtByCategoryId(category.getId(),category.getDeletedAt());
             return category;
         } else {
             throw new IllegalArgumentException("You are not the owner of this category");
         }
     }
+
 
 }

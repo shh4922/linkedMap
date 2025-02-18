@@ -3,14 +3,16 @@ package com.hyeonho.linkedmap.controller;
 import com.hyeonho.linkedmap.data.request.CreateCategoryReq;
 import com.hyeonho.linkedmap.data.request.DeleteCategoryReq;
 import com.hyeonho.linkedmap.entity.Category;
-import com.hyeonho.linkedmap.entity.Member;
-import com.hyeonho.linkedmap.repository.MemberRepository;
 import com.hyeonho.linkedmap.service.CategoryService;
-import com.hyeonho.linkedmap.service.MemberService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -48,5 +50,33 @@ public class CategoryController {
         return categoryService.deleteCategory(req);
     }
 
+
+    /**
+     * 카테고리 업데이트
+     * @param req
+     * @return
+     */
+    @PutMapping("/category/update")
+    public Category updateCategory(@RequestBody DeleteCategoryReq req) {
+        Category category = categoryService.findCategoryById(req.getCategoryId());
+
+        BeanUtils.copyProperties(req, category, getNullPropertyNames(req));
+        return categoryService.saveCategory(category);
+    }
+
+    private String[] getNullPropertyNames(Object source) {
+        final BeanWrapper src = new BeanWrapperImpl(source);
+        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+
+        Set<String> emptyNames = new HashSet<>();
+        for (java.beans.PropertyDescriptor pd : pds) {
+            Object srcValue = src.getPropertyValue(pd.getName());
+            if (srcValue == null) {
+                emptyNames.add(pd.getName());
+            }
+        }
+        String[] result = new String[emptyNames.size()];
+        return emptyNames.toArray(result);
+    }
 
 }
