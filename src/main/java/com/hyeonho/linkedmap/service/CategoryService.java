@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -35,18 +36,18 @@ public class CategoryService {
      * @param request
      * @return
      */
-    public Category createCategory(CreateCategoryReq request) {
+    public Optional<Category> createCategory(CreateCategoryReq request) {
         Member member = memberRepository.findById(request.getEmail()).orElseThrow();
-        Category category = new Category(member,request.getCategoryName());
+        Category category = new Category(member, request.getCategoryName());
         Category savedCategory = saveCategory(category);
 
 
         if(savedCategory.equals(category)) {
             CategoryUser categoryUser = new CategoryUser(savedCategory, member, InviteState.INVITE, CategoryUserRole.OWNER);
             categoryUserRepository.save(categoryUser);
+            return Optional.of(savedCategory);
         }
-
-        return savedCategory;
+        return Optional.empty();
     }
 
     public Category saveCategory(Category category) {
@@ -62,16 +63,21 @@ public class CategoryService {
         return categoryUserRepository.getIncludeCategoryByEmail(email);
     }
 
+    /**
+     * 카테고리 삭제시, CategoryUser에 있는 카테고리도 모두 삭제해주어야함.
+     * @param req
+     * @return
+     */
     @Transactional
     public Category deleteCategory(DeleteCategoryReq req) {
         Category findCategory = categoryRepository.findById(req.getCategoryId()).orElseThrow();
 
         if (findCategory.getOwner().getEmail().equals(req.getEmail())) {
             findCategory.delete(); // deletedAt 필드를 현재 시간으로 업데이트
-            Category category = categoryRepository.save(findCategory); // 변경된 엔티티 저장
+            saveCategory(findCategory);
 
 //            categoryUserRepository.bulkUpdateDeletedAtByCategoryId(category.getId(),category.getDeletedAt());
-            return category;
+            return findCategory;
         } else {
             throw new IllegalArgumentException("You are not the owner of this category");
         }

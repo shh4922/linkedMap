@@ -1,5 +1,8 @@
 package com.hyeonho.linkedmap.controller;
 
+import com.hyeonho.linkedmap.data.DefaultResponse;
+import com.hyeonho.linkedmap.data.dto.MarkerRes;
+import com.hyeonho.linkedmap.data.request.CategoryUpdateReq;
 import com.hyeonho.linkedmap.data.request.CreateCategoryReq;
 import com.hyeonho.linkedmap.data.request.DeleteCategoryReq;
 import com.hyeonho.linkedmap.entity.Category;
@@ -7,12 +10,11 @@ import com.hyeonho.linkedmap.service.CategoryService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -25,18 +27,26 @@ public class CategoryController {
 
     /** 특정유저가 속한, 카테고리 조회 */
     @GetMapping("categoys/include")
-    public List<Category> getIncludeCategory(@RequestParam Map<String, String> req) {
+    public ResponseEntity<DefaultResponse<List<Category>>> getIncludeCategory(@RequestParam Map<String, String> req) {
         String email = req.get("email");
         if(email.isEmpty()) {
-            System.out.println("이메일 비어있음");
+            return ResponseEntity.badRequest().body(DefaultResponse.error(400, "이메일이 없습니다."));
         }
-        return categoryService.getIncludeCategory(email);
+        List<Category> categoryList = categoryService.getIncludeCategory(email);
+        return ResponseEntity.ok(DefaultResponse.success(categoryList));
     }
 
     /** 카테고리 생성 */
     @PostMapping("/category/create")
-    public Category createCategory(@RequestBody CreateCategoryReq request) {
-        return categoryService.createCategory(request);
+    public ResponseEntity<DefaultResponse<Category>> createCategory(@RequestBody CreateCategoryReq request) {
+        Optional<Category> categoryOptional = categoryService.createCategory(request);
+
+        if (categoryOptional.isPresent()) {
+            return ResponseEntity.ok(DefaultResponse.success(categoryOptional.get()));
+        } else {
+            return ResponseEntity.badRequest()
+                    .body(DefaultResponse.error(400, "카테고리 생성 실패"));
+        }
     }
 
     /**
@@ -52,31 +62,18 @@ public class CategoryController {
 
 
     /**
-     * 카테고리 업데이트
+     * 카테고리 생성자인지 체크후, 수정
      * @param req
      * @return
      */
     @PutMapping("/category/update")
-    public Category updateCategory(@RequestBody DeleteCategoryReq req) {
+    public ResponseEntity<DefaultResponse<Category>> updateCategory(@RequestBody CategoryUpdateReq req) {
         Category category = categoryService.findCategoryById(req.getCategoryId());
-
-        BeanUtils.copyProperties(req, category, getNullPropertyNames(req));
-        return categoryService.saveCategory(category);
-    }
-
-    private String[] getNullPropertyNames(Object source) {
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
-
-        Set<String> emptyNames = new HashSet<>();
-        for (java.beans.PropertyDescriptor pd : pds) {
-            Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null) {
-                emptyNames.add(pd.getName());
-            }
+        if(category.getOwner().equals(req.getMemberEmail())) {
+            category.update(req);
+            Category category1 = categoryService.saveCategory(category);
+            return ResponseEntity.ok(DefaultResponse.success(category1));
         }
-        String[] result = new String[emptyNames.size()];
-        return emptyNames.toArray(result);
+        return ResponseEntity.badRequest().body(DefaultResponse.error(400,"권한이 없습니다"));
     }
-
 }

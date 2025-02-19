@@ -22,7 +22,7 @@ public class MemberTest {
 
     @Test
     public void createMember() {
-        Member member = new Member("test111@test.com", "1111", "testUser", Role.ROLE_USER);
+        Member member = new Member("test222@test.com", "1111", "testUser2", Role.ROLE_USER);
         memberRepository.save(member);
     }
 

@@ -1,5 +1,6 @@
 package com.hyeonho.linkedmap.entity;
 
+import com.hyeonho.linkedmap.data.request.CategoryUpdateReq;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -45,6 +46,11 @@ public class Category {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+    public void update(CategoryUpdateReq req) {
+        if (req.getCategoryName() != null) {
+            this.name = req.getCategoryName();
+        }
     }
 
     public void delete() {
