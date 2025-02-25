@@ -3,7 +3,7 @@ package com.hyeonho.linkedmap.enumlist;
 public enum Role {
     ROLE_USER("ROLE_USER"),
     ROLE_ANONYMOUS("ROLE_ANONYMOUS"),
-    ROLE_ADMIN("ROLE_ADMIN");
+    ROLE_ADMIN("ADMIN");
 
     String role;
 

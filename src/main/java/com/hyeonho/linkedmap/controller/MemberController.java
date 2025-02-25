@@ -1,5 +1,7 @@
 package com.hyeonho.linkedmap.controller;
 
+import com.hyeonho.linkedmap.data.dto.LoginResponseDTO;
+import com.hyeonho.linkedmap.data.request.LoginRequestDTO;
 import com.hyeonho.linkedmap.data.request.RegisterRequest;
 import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.service.MemberService;
@@ -23,10 +25,10 @@ public class MemberController {
         return member;
     }
 
-    /** 로그인 */
-
-
-
-
+    @PostMapping("/login")
+    public LoginResponseDTO login(@RequestBody LoginRequestDTO request) {
+        LoginResponseDTO responseDTO = memberService.login(request);
+        return responseDTO;
+    }
 
 }
