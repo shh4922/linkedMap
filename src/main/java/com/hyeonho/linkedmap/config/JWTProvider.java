@@ -35,6 +35,10 @@ public class JWTProvider {
     }
 
 
+    /**
+     * Claims.getId() 는 Claims 중 jti라는 애를 가져와서 리턴함
+     * jti는 JWT의 고유 식별자임. 중복제거를 위한 고유값인데, 블랙리스트, 중복로그인 방지를 위해 쓰임.
+     */
     public String getUsernameFromToken(final String token) {
         return getClaimFromToken(token, Claims::getId);
     }
@@ -42,7 +46,11 @@ public class JWTProvider {
     /**
      * token 사용자 속성 정보 조회
      * @param token JWT
-     * @param claimsResolver Get Function With Target Claim 뭐임..?
+     * @param claimsResolver 함수를 매개변수로 받는 상황인거
+     *                       getUsernameFromToken()에서 Claims.getId() 라는 함수를 넘겨줌.
+     *                       그럼 getClaimFromToken() 서 claimsResolver에서 해당함수 받고 전달받은 함수 수행해서 리턴함.
+     *                       그때 수행하게 하는게 apply임. apply하면 해당함수 실행하게 하는것같음.
+     *                       리턴타입은 매개변수로 전달받은 함수의 리턴값을 해당함수의 리턴값으로 하는것같음.
      * @return Target Claim
      * @param <T>
      */
