@@ -7,6 +7,8 @@ import com.hyeonho.linkedmap.entity.CategoryUser;
 import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.enumlist.CategoryUserRole;
 import com.hyeonho.linkedmap.enumlist.InviteState;
+import com.hyeonho.linkedmap.error.DatabaseException;
+import com.hyeonho.linkedmap.error.DuplicateMemberException;
 import com.hyeonho.linkedmap.repository.CategoryRepository;
 import com.hyeonho.linkedmap.repository.CategoryUserRepository;
 import com.hyeonho.linkedmap.repository.MemberRepository;
@@ -36,18 +38,21 @@ public class CategoryService {
      * @param request
      * @return
      */
-    public Optional<Category> createCategory(CreateCategoryReq request) {
-        Member member = memberRepository.findById(request.getEmail()).orElseThrow();
-        Category category = new Category(member, request.getCategoryName());
-        Category savedCategory = saveCategory(category);
+    public Optional<Category> createCategory(String email, CreateCategoryReq request) {
+        try {
+            Member member = memberRepository.findById(email)
+                    .orElseThrow(() -> new RuntimeException("해당 계정 없음"));
 
+            Category category = new Category(member, request.getCategoryName());
+            saveCategory(category);
 
-        if(savedCategory.equals(category)) {
-            CategoryUser categoryUser = new CategoryUser(savedCategory, member, InviteState.INVITE, CategoryUserRole.OWNER);
+            // 카테고리 생성후, 카테고리유저 테이블에 추가
+            CategoryUser categoryUser = new CategoryUser(category, member, InviteState.INVITE, CategoryUserRole.OWNER);
             categoryUserRepository.save(categoryUser);
-            return Optional.of(savedCategory);
+            return Optional.of(category);
+        } catch (DatabaseException e) {
+            throw new DatabaseException("카테고리 생성 에러");
         }
-        return Optional.empty();
     }
 
     public Category saveCategory(Category category) {

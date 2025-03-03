@@ -6,6 +6,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -182,11 +183,11 @@ public class JWTProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (SecurityException e) {
-            log.warn("Invalid JWT signature: {}", e.getMessage());
+            log.warn("토큰 서명키 다름: {}", e.getMessage());
         } catch (MalformedJwtException e) {
-            log.warn("Invalid JWT token: {}", e.getMessage());
+            log.warn("토큰 형식이 이상함: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            log.warn("JWT token is expired: {}", e.getMessage());
+            log.warn("토큰이 만료됨: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
             log.warn("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -194,6 +195,11 @@ public class JWTProvider {
         }
 
         return false;
+    }
+
+    public String getEmailFromHeaders(HttpHeaders headers) {
+        String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        return getUsernameFromToken(authorization);
     }
 
 }

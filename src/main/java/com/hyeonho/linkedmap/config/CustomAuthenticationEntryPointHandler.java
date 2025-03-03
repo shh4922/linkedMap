@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,10 @@ import java.io.IOException;
 public class CustomAuthenticationEntryPointHandler implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        log.info("[JwtAuthenticationFilter] Authorization 헤더: {}", authorizationHeader);
+
         log.info("[CustomAuthenticationEntryPointHandler] :: {}", authException.getMessage());
         log.info("[CustomAuthenticationEntryPointHandler] :: {}", request.getRequestURL());
         log.info("[CustomAuthenticationEntryPointHandler] :: 토근 정보가 만료되었거나 존재하지 않음");
@@ -34,6 +39,6 @@ public class CustomAuthenticationEntryPointHandler implements AuthenticationEntr
 //
 //        PrintWriter out = response.getWriter();
 //        out.print(returnJson);
-        response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"토큰이 없거나 만료되었습니다.\"}");
+        response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"토큰이 없거나 만료되었습니다.ㅋㅋ\"}");
     }
 }

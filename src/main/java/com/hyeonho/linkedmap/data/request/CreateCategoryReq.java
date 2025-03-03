@@ -6,6 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreateCategoryReq {
-    private String email;
     private String categoryName;
 }
