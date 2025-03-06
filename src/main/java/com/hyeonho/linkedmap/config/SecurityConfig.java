@@ -39,10 +39,12 @@ public class SecurityConfig {
 
         RequestMatcher[] permitAllWhiteList = {
                 new AntPathRequestMatcher("/api/v1/login"),
+                new AntPathRequestMatcher("/api/v1//kakao/auth"),
                 new AntPathRequestMatcher("/api/v1/register"),
                 new AntPathRequestMatcher("/api/v1/token-refresh"),
                 new AntPathRequestMatcher("/api/v1/favicon.ico"),
                 new AntPathRequestMatcher("/api/v1/error")
+
         };
 
         http.authorizeHttpRequests(authorize -> authorize

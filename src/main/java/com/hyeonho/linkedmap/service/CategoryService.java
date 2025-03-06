@@ -1,8 +1,10 @@
 package com.hyeonho.linkedmap.service;
 
+import com.hyeonho.linkedmap.data.DefaultResponse;
 import com.hyeonho.linkedmap.data.request.CreateCategoryReq;
 import com.hyeonho.linkedmap.data.request.DeleteCategoryReq;
 import com.hyeonho.linkedmap.entity.Category;
+import com.hyeonho.linkedmap.entity.CategoryState;
 import com.hyeonho.linkedmap.entity.CategoryUser;
 import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.enumlist.CategoryUserRole;
@@ -13,6 +15,7 @@ import com.hyeonho.linkedmap.repository.CategoryRepository;
 import com.hyeonho.linkedmap.repository.CategoryUserRepository;
 import com.hyeonho.linkedmap.repository.MemberRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -47,7 +50,7 @@ public class CategoryService {
             saveCategory(category);
 
             // 카테고리 생성후, 카테고리유저 테이블에 추가
-            CategoryUser categoryUser = new CategoryUser(category, member, InviteState.INVITE, CategoryUserRole.OWNER);
+            CategoryUser categoryUser = new CategoryUser(category, member, InviteState.INVITE, CategoryUserRole.OWNER, CategoryState.ACTIVE);
             categoryUserRepository.save(categoryUser);
             return Optional.of(category);
         } catch (DatabaseException e) {
@@ -68,24 +71,29 @@ public class CategoryService {
         return categoryUserRepository.getIncludeCategoryByEmail(email);
     }
 
-    /**
-     * 카테고리 삭제시, CategoryUser에 있는 카테고리도 모두 삭제해주어야함.
-     * @param req
-     * @return
-     */
+
     @Transactional
-    public Category deleteCategory(DeleteCategoryReq req) {
-        Category findCategory = categoryRepository.findById(req.getCategoryId()).orElseThrow();
+    public Category deleteCategory(String email, Long categoryId) {
+        try {
+            Category category = findCategoryById(categoryId);
 
-        if (findCategory.getOwner().getEmail().equals(req.getEmail())) {
-            findCategory.delete(); // deletedAt 필드를 현재 시간으로 업데이트
-            saveCategory(findCategory);
+            if(!category.getOwner().getEmail().equals(email)) {
+                ResponseEntity.badRequest()
+                        .body(DefaultResponse.error(400, "카테고리 소유자 아니면 삭제못함"));
+            }
 
-//            categoryUserRepository.bulkUpdateDeletedAtByCategoryId(category.getId(),category.getDeletedAt());
-            return findCategory;
-        } else {
-            throw new IllegalArgumentException("You are not the owner of this category");
+            category.delete();
+
+            // TODO: 삭제 성공후 카테고리유저에 있는 해당 카테고리에 속한 유저의 카테고리 상태를 DELETE로 업데이트 해줘야함. 벌크연산필요.
+            if(saveCategory(category) != null) {
+
+            }
+
+            return saveCategory(category);
+        } catch (DatabaseException e) {
+            throw new DatabaseException("카테고리 삭제 에러");
         }
+
     }
 
 

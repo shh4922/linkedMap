@@ -34,6 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 //        log.info("JwtAuthFilter :{}", request.getRequestURL());
         if (request.getRequestURI().startsWith("/api/v1/login") ||
                 request.getRequestURI().startsWith("/api/v1/register") ||
+                request.getRequestURI().startsWith("/api/v1/kakao/auth") ||
                 request.getRequestURI().startsWith("/api/v1/token-refresh")) {
             filterChain.doFilter(request, response);
             return;

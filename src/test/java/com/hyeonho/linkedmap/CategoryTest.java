@@ -3,6 +3,7 @@ package com.hyeonho.linkedmap;
 import com.hyeonho.linkedmap.data.request.CategoryUpdateReq;
 import com.hyeonho.linkedmap.data.request.DeleteCategoryReq;
 import com.hyeonho.linkedmap.entity.Category;
+import com.hyeonho.linkedmap.entity.CategoryState;
 import com.hyeonho.linkedmap.entity.CategoryUser;
 import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.enumlist.CategoryUserRole;
@@ -43,7 +44,7 @@ public class CategoryTest {
         Category category = new Category(member,"카테고리2");
         categoryRepository.save(category);
 
-        CategoryUser categoryUser = new CategoryUser(category, member, InviteState.INVITE, CategoryUserRole.OWNER);
+        CategoryUser categoryUser = new CategoryUser(category, member, InviteState.INVITE, CategoryUserRole.OWNER, CategoryState.ACTIVE);
         categoryUserRepository.save(categoryUser);
     }
 

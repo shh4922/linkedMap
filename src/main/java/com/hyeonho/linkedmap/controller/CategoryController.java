@@ -2,7 +2,6 @@ package com.hyeonho.linkedmap.controller;
 
 import com.hyeonho.linkedmap.config.JWTProvider;
 import com.hyeonho.linkedmap.data.DefaultResponse;
-import com.hyeonho.linkedmap.data.dto.MarkerRes;
 import com.hyeonho.linkedmap.data.request.CategoryUpdateReq;
 import com.hyeonho.linkedmap.data.request.CreateCategoryReq;
 import com.hyeonho.linkedmap.data.request.DeleteCategoryReq;
@@ -10,11 +9,7 @@ import com.hyeonho.linkedmap.entity.Category;
 import com.hyeonho.linkedmap.error.InvalidRequestException;
 import com.hyeonho.linkedmap.service.CategoryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -72,8 +67,14 @@ public class CategoryController {
      * @return
      */
     @PostMapping("/category/delete")
-    public Category deleteCategory(@RequestBody DeleteCategoryReq req) {
-        return categoryService.deleteCategory(req);
+    public ResponseEntity<DefaultResponse<Category>> deleteCategory(@RequestHeader HttpHeaders headers, @RequestBody DeleteCategoryReq req) {
+        String email = jwtProvider.getEmailFromHeaders(headers);
+        if(req.getCategoryId() == null) {
+            return ResponseEntity.badRequest()
+                    .body(DefaultResponse.error(400, "카테고리 소유자 아니면 삭제못함"));
+        }
+
+        return ResponseEntity.ok(DefaultResponse.success(categoryService.deleteCategory(email, req.getCategoryId())));
     }
 
 
