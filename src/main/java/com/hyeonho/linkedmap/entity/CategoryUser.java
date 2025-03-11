@@ -70,4 +70,8 @@ public class CategoryUser {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void updateInviteState(InviteState invitedState) {
+        this.invitedState = invitedState;
+    }
+
 }

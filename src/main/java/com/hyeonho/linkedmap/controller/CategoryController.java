@@ -49,12 +49,12 @@ public class CategoryController {
     }
 
 
-    /** 카테고리 조회 */
+    /** 특정 유저가 속한 카테고리 조회 */
     @GetMapping("category/include")
     public ResponseEntity<DefaultResponse<List<Category>>> getIncludeCategory(@RequestParam String email) {
         if(email.isEmpty()) { throw new InvalidRequestException("이메일이 없음"); }
 
-        List<Category> categoryList = categoryService.getIncludeCategory(email);
+        List<Category> categoryList = categoryService.getIncludeCategoryByEmail(email);
         return ResponseEntity.ok(DefaultResponse.success(categoryList));
     }
 
@@ -63,6 +63,7 @@ public class CategoryController {
     /**
      * 카테고리 삭제
      * 카테고리 삭제시, CategoryUser에 있는 곳에 deleted_at 시간 또한 업데이트 해주어야함.
+     * 카테고리 유저에 있는 해당 카테고리의 category_state 를 Delete로 변경
      * @param req
      * @return
      */
@@ -88,7 +89,8 @@ public class CategoryController {
         Category category = categoryService.findCategoryById(req.getCategoryId());
         if(category.getOwner().equals(req.getMemberEmail())) {
             category.update(req);
-            Category category1 = categoryService.saveCategory(category);
+
+            Category category1 = categoryService.saveCategory(category).orElseThrow();
             return ResponseEntity.ok(DefaultResponse.success(category1));
         }
         return ResponseEntity.badRequest().body(DefaultResponse.error(400,"권한이 없습니다"));
