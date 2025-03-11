@@ -4,6 +4,7 @@ import com.hyeonho.linkedmap.entity.Category;
 import com.hyeonho.linkedmap.entity.CategoryState;
 import com.hyeonho.linkedmap.entity.CategoryUser;
 import com.hyeonho.linkedmap.entity.Member;
+import com.hyeonho.linkedmap.enumlist.InviteState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -29,17 +30,15 @@ public interface CategoryUserRepository extends JpaRepository<CategoryUser, Long
     @Query("SELECT cu.category FROM CategoryUser cu WHERE cu.member.id = :email")
     List<Category> getIncludeCategoryByEmail(String email);
 
-    /**
-     * 카테고리id, 유저이름 으로 카테고리 찾기
-     * @param email
-     * @return
-     */
-    @Query("SELECT * FROM CategoryUser cu WHERE cu.member.id = :email AND cu.category.id = :categoryId")
-    CategoryUser findCategoryUserByCategoryIdAndEmail(String email, Long categoryId);
 
     @Modifying
     @Query("UPDATE CategoryUser cu SET cu.categoryStatus = :status WHERE cu.category.id = :categoryId")
-    int updateCategoryStatusToDelete(@Param("categoryId") Long categoryId, @Param("status") CategoryState status);
+    int updateCategoryStatusToDelete(@Param("categoryId") Long categoryId, @Param("status") String status);
+
+    @Modifying
+    @Query("UPDATE CategoryUser cu SET cu.inviteState = :inviteState WHERE cu.category.id = :categoryId AND cu.member.email = :email")
+    int updateInviteStatusToDelete(@Param("categoryId") Long categoryId, @Param("email") String email, @Param("inviteState") String inviteState);
+
 
 
     boolean existsByCategoryIdAndMemberEmail(Long categoryId, String email);

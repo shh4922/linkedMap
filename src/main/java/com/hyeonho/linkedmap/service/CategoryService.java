@@ -85,14 +85,12 @@ public class CategoryService {
             category.delete();
 
             // TODO: 삭제 성공후 카테고리유저에 있는 해당 카테고리에 속한 유저의 카테고리 상태를 DELETE로 업데이트 해줘야함. 벌크연산필요.
-            if(saveCategory(category).isPresent()) {
-                categoryUserRepository.updateCategoryStatusToDelete(categoryId,CategoryState.DELETE);
-                CategoryUser categoryUser = categoryUserRepository.findCategoryUserByCategoryIdAndEmail(email,categoryId);
-                categoryUser.updateInviteState(InviteState.GETOUT);
-                categoryUserRepository.save(categoryUser);
-            }
+//            if(saveCategory(category).isPresent()) {
+                categoryUserRepository.updateCategoryStatusToDelete(categoryId,CategoryState.DELETE.name());
+                categoryUserRepository.updateInviteStatusToDelete(categoryId,email,InviteState.GETOUT.name());
+//            }
 
-            return saveCategory(category);
+            return category;
         } catch (DatabaseException e) {
             throw new DatabaseException("카테고리 삭제 에러");
         }
