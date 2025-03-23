@@ -28,9 +28,9 @@ public class CategoryUser {
     private Member member;
 
     /** 초대 상태 */
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(name = "invited_state")
-    private InviteState invitedState;
+    private InviteState inviteState;
 
     /** 속한 카테고리 에서 권한 */
     @Enumerated(EnumType.STRING)
@@ -52,10 +52,10 @@ public class CategoryUser {
     private LocalDateTime deletedAt;
 
     @Builder
-    public CategoryUser(Category category, Member member, InviteState invitedState, CategoryUserRole categoryUserRole, CategoryState categoryState) {
+    public CategoryUser(Category category, Member member, InviteState inviteState, CategoryUserRole categoryUserRole, CategoryState categoryState) {
         this.category = category;
         this.member = member;
-        this.invitedState = invitedState;
+        this.inviteState = inviteState;
         this.categoryUserRole = categoryUserRole;
         this.categoryState = categoryState;
     }
@@ -70,8 +70,8 @@ public class CategoryUser {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateInviteState(InviteState invitedState) {
-        this.invitedState = invitedState;
+    public void updateInviteState(InviteState inviteState) {
+        this.inviteState = inviteState;
     }
 
 }

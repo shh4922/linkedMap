@@ -8,10 +8,12 @@ import com.hyeonho.linkedmap.enumlist.InviteState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+//@NoRepositoryBean
 public interface CategoryUserRepository extends JpaRepository<CategoryUser, Long> {
 
     /**
@@ -32,12 +34,12 @@ public interface CategoryUserRepository extends JpaRepository<CategoryUser, Long
 
 
     @Modifying
-    @Query("UPDATE CategoryUser cu SET cu.categoryStatus = :status WHERE cu.category.id = :categoryId")
-    int updateCategoryStatusToDelete(@Param("categoryId") Long categoryId, @Param("status") String status);
-
+    @Query("UPDATE CategoryUser cu SET cu.categoryState = :state WHERE cu.category.id = :categoryId")
+    int updateCategoryStatusToDelete(Long categoryId,  String state);
+//
     @Modifying
     @Query("UPDATE CategoryUser cu SET cu.inviteState = :inviteState WHERE cu.category.id = :categoryId AND cu.member.email = :email")
-    int updateInviteStatusToDelete(@Param("categoryId") Long categoryId, @Param("email") String email, @Param("inviteState") String inviteState);
+    int updateInviteStatusToDelete(Long categoryId, String email, String inviteState);
 
 
 

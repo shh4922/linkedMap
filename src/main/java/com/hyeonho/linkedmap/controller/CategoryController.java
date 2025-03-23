@@ -61,13 +61,13 @@ public class CategoryController {
 
 
     /**
-     * 카테고리 삭제
+     * 카테고리 삭제 (카테고리 생성자가 해당카테고리를 삭제함)
      * 카테고리 삭제시, CategoryUser에 있는 곳에 deleted_at 시간 또한 업데이트 해주어야함.
      * 카테고리 유저에 있는 해당 카테고리의 category_state 를 Delete로 변경
      * @param req
      * @return
      */
-    @PostMapping("/category/delete")
+    @DeleteMapping("/category")
     public ResponseEntity<DefaultResponse<Category>> deleteCategory(@RequestHeader HttpHeaders headers, @RequestBody DeleteCategoryReq req) {
         String email = jwtProvider.getEmailFromHeaders(headers);
         if(req.getCategoryId() == null) {
@@ -76,6 +76,21 @@ public class CategoryController {
         }
 
         return ResponseEntity.ok(DefaultResponse.success(categoryService.deleteCategory(email, req.getCategoryId())));
+    }
+
+    /**
+     * 카테고리 나가기.
+     */
+    @PostMapping("/category/getout/{categoryId}")
+    public ResponseEntity<DefaultResponse<Integer>> getOutCategory(@RequestHeader HttpHeaders headers, @PathVariable Long categoryId) {
+        if(categoryId == null) {
+            return ResponseEntity.badRequest()
+                    .body(DefaultResponse.error(400, "categoryId 가 없음"));
+        }
+
+        String email = jwtProvider.getEmailFromHeaders(headers);
+        int result = categoryService.getOutCategory(email,categoryId);
+        return ResponseEntity.ok(DefaultResponse.success(result));
     }
 
 
@@ -95,4 +110,13 @@ public class CategoryController {
         }
         return ResponseEntity.badRequest().body(DefaultResponse.error(400,"권한이 없습니다"));
     }
+
+//    /**
+//     * 초대된 카테고리 가입
+//     * @return
+//     */
+//    @PostMapping("/category/join")
+//    public ResponseEntity<DefaultResponse<Map<String, String>>> joinCategory(@RequestHeader HttpHeaders headers, @RequestBody ) {
+//
+//    }
 }

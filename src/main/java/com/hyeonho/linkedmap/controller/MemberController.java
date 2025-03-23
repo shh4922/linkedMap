@@ -39,6 +39,9 @@ public class MemberController {
             return ResponseEntity.badRequest().body(DefaultResponse.error(400, "정보를 모두 입력하세요"));
         }
 
+        log.info("name {}",request.getUsername());
+        log.info("pass {}",request.getPassword());
+        log.info("email {}",request.getEmail());
         Member member = memberService.register(request);
         return ResponseEntity.ok(DefaultResponse.success(member));
     }

@@ -2,27 +2,32 @@ package com.hyeonho.linkedmap.entity;
 
 import com.hyeonho.linkedmap.enumlist.InviteState;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
+
 
 @Entity
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "invite")
 public class Invite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "invitor", nullable = false, length = 50)
+    @Column(name = "category_id", nullable = false)
+    private Long categoryId;
+
+    @Column(name = "invitor", nullable = false)
     private String invitor;
 
-    @Column(name = "invited_member", length = 50)
+    @Column(name = "invited_member", nullable = true)
     private String invitedMember;
+
+    @Column(nullable = false, unique = true)
+    private UUID inviteKey;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -34,8 +39,29 @@ public class Invite {
     @Column(name = "invite_state", nullable = false)
     private InviteState inviteState;
 
+    //    @ManyToOne
+//    @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+//    private Category category;
+
+    //    @ManyToOne
+//    @JoinColumn(name = "invitor", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+//    private Member invitor;
+//
+//    @ManyToOne
+//    @JoinColumn(name = "invited_member", nullable = true, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+//    private Member invitedMember;
+
+    @Builder
+    public Invite(Long categoryId, String invitor) {
+        this.categoryId = categoryId;
+        this.invitor = invitor;
+    }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.inviteKey = UUID.randomUUID();
+        this.expireAt = createdAt.plusMinutes(5);
+        this.inviteState = InviteState.PENDING;
     }
 }

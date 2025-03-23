@@ -34,6 +34,7 @@ public class MemberService {
         try {
             String password = bCryptPasswordEncoder.encode(request.getPassword());
             Member member1 = new Member(request.getEmail(), password, request.getUsername(), Role.ROLE_USER);
+            log.info("create member {}", member1);
             return memberRepository.save(member1);
         } catch (DatabaseException e) {
             throw new DatabaseException("회원가입-디비오류");
