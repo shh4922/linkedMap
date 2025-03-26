@@ -35,6 +35,12 @@ public class InviteController {
     private final CategoryService categoryService;
     private final MemberService memberService;
 
+    /**
+     * 초대 링크 생성
+     * @param headers
+     * @param req
+     * @return
+     */
     @PostMapping("/invite/create")
     public ResponseEntity<DefaultResponse<Map<String, String>>> createInvite(@RequestHeader HttpHeaders headers, @RequestBody InviteCreateReq req) {
 
@@ -58,10 +64,9 @@ public class InviteController {
     }
 
     /**
-     * 초대된 카테고리 가입
-     * 해당 카테고리ID의 UUDID가 있는 invite가 있는지 체크
-     * 있다면 expire체크
-     * 조건이 만족하면 가입
+     * 초대링크 가입
+     * @param headers
+     * @param req
      * @return
      */
     @PostMapping("/invite/join")

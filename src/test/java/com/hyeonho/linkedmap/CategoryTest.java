@@ -50,8 +50,8 @@ public class CategoryTest {
 
     @Test
     public void 유저가속한_카테고리_리스트조회() {
-        List<Category> categoryList = categoryUserRepository.getIncludeCategoryByEmail("test111@test.com");
-        List<Category> filterdCategoryList = categoryList.stream()
+        List<CategoryUser> categoryList = categoryUserRepository.getIncludeCategoryByEmail("test111@test.com");
+        List<CategoryUser> filterdCategoryList = categoryList.stream()
                 .filter(category -> category.getDeletedAt() == null)
                         .toList();
         log.info("filtered", filterdCategoryList);

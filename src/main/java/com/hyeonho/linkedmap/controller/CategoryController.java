@@ -6,6 +6,9 @@ import com.hyeonho.linkedmap.data.request.CategoryUpdateReq;
 import com.hyeonho.linkedmap.data.request.CreateCategoryReq;
 import com.hyeonho.linkedmap.data.request.DeleteCategoryReq;
 import com.hyeonho.linkedmap.entity.Category;
+import com.hyeonho.linkedmap.entity.CategoryState;
+import com.hyeonho.linkedmap.entity.CategoryUser;
+import com.hyeonho.linkedmap.enumlist.InviteState;
 import com.hyeonho.linkedmap.error.InvalidRequestException;
 import com.hyeonho.linkedmap.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import java.util.*;
 public class CategoryController {
     private final CategoryService categoryService;
     private final JWTProvider jwtProvider;
+
 
     /** 카테고리 생성 */
     @PostMapping("/category/create")
@@ -41,22 +45,35 @@ public class CategoryController {
 
     /**
      * 내가 속해있는 카테고리 조회
+     * InviteState 가 Invited 인 것만 조회해야함.
+     * 하지만 CategoryStatus 가 delete 면 화면에서 삭제된카테고리 라고 보여줘야함.
+     * categoryUser를 조회해야함
      */
     @GetMapping("/category/me")
-    public ResponseEntity<DefaultResponse<List<Category>>> getMyCategory(@RequestHeader HttpHeaders headers) {
+    public ResponseEntity<DefaultResponse<List<CategoryUser>>> getMyCategory(@RequestHeader HttpHeaders headers) {
         String email = jwtProvider.getEmailFromHeaders(headers);
-        return getIncludeCategory(email);
-    }
-
-
-    /** 특정 유저가 속한 카테고리 조회 */
-    @GetMapping("category/include")
-    public ResponseEntity<DefaultResponse<List<Category>>> getIncludeCategory(@RequestParam String email) {
-        if(email.isEmpty()) { throw new InvalidRequestException("이메일이 없음"); }
-
-        List<Category> categoryList = categoryService.getIncludeCategoryByEmail(email);
+        List<CategoryUser> categoryList = getShowableCategoryList(getCategoryList(email));
         return ResponseEntity.ok(DefaultResponse.success(categoryList));
     }
+
+
+    /**
+     * 특정 유저가 속한 카테고리 조회
+     * 특정 유저가 속한 카테고리를 조회할때는, CategoryState 가 Active 인것만 조회해서 보여주어야함.
+     */
+    @GetMapping("category/include")
+    public ResponseEntity<DefaultResponse<List<CategoryUser>>> getIncludeCategory(@RequestParam String email) {
+        if(email.isEmpty()) { throw new InvalidRequestException("이메일이 없음"); }
+
+        List<CategoryUser> categoryList = getShowableCategoryList(getCategoryList(email))
+                .stream()
+                .filter(categoryUser -> categoryUser.getCategoryState() == CategoryState.ACTIVE)
+                .filter(categoryUser -> categoryUser.getInviteState() == InviteState.INVITE)
+                .toList();
+
+        return ResponseEntity.ok(DefaultResponse.success(categoryList));
+    }
+
 
 
 
@@ -111,12 +128,16 @@ public class CategoryController {
         return ResponseEntity.badRequest().body(DefaultResponse.error(400,"권한이 없습니다"));
     }
 
-//    /**
-//     * 초대된 카테고리 가입
-//     * @return
-//     */
-//    @PostMapping("/category/join")
-//    public ResponseEntity<DefaultResponse<Map<String, String>>> joinCategory(@RequestHeader HttpHeaders headers, @RequestBody ) {
-//
-//    }
+
+    private List<CategoryUser> getCategoryList(String email) {
+        return categoryService.getIncludeCategoryByEmail(email);
+    }
+
+    /** 삭제되지 않은 데이터만 리턴*/
+    private List<CategoryUser> getShowableCategoryList(List<CategoryUser> categoryList) {
+        return categoryList
+                .stream()
+                .filter(category -> category.getCategoryState() == CategoryState.ACTIVE)
+                .toList();
+    }
 }

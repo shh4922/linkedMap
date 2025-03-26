@@ -29,8 +29,8 @@ public interface CategoryUserRepository extends JpaRepository<CategoryUser, Long
      * @param email
      * @return
      */
-    @Query("SELECT cu.category FROM CategoryUser cu WHERE cu.member.id = :email")
-    List<Category> getIncludeCategoryByEmail(String email);
+    @Query("SELECT CategoryUser cu FROM cu WHERE cu.member.id = :email")
+    List<CategoryUser> getIncludeCategoryByEmail(String email);
 
 
     @Modifying

@@ -37,7 +37,7 @@ public class CategoryUser {
     @Column(name = "category_user_role")
     private CategoryUserRole categoryUserRole;
 
-    /** 카테고리의 상태 - 활성화, 삭제된카테고리 */
+    /** 카테고리의 상태 - 활성화, deletePending, delete */
     @Enumerated(EnumType.STRING)
     @Column(name = "category_state")
     private CategoryState categoryState;

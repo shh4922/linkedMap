@@ -67,7 +67,7 @@ public class CategoryService {
     }
 
 
-    public List<Category> getIncludeCategoryByEmail(String email) {
+    public List<CategoryUser> getIncludeCategoryByEmail(String email) {
         return categoryUserRepository.getIncludeCategoryByEmail(email);
     }
 
@@ -88,7 +88,6 @@ public class CategoryService {
             if(saveCategory(category).isPresent()) {
                 categoryUserRepository.updateCategoryStatusToDelete(categoryId,CategoryState.DELETE.name()); // categoryUser에 있는 해당카테고리 상태 삭제됌 으로 변경
                 getOutCategory(email,categoryId);
-//                categoryUserRepository.updateInviteStatusToDelete(categoryId,email,InviteState.GETOUT.name()); // 삭제한 유저 초대상태 나감으로 변경
             }
 
             return category;
