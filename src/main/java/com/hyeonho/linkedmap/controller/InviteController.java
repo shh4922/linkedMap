@@ -71,12 +71,24 @@ public class InviteController {
         }
 
         String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
+
         if(authorization != null) {
             String email = jwtProvider.getUsernameFromToken(authorization);
 
+            // 초대 uuid 가 있는지 체크
             Invite invite = inviteService.findInviteByUUID(req.getInviteKey());
             if(invite == null) {
                 return ResponseEntity.ok(DefaultResponse.error(410,"없는 초대링크임"));
+            }
+
+            // Pending 인지 체크
+            if(invite.getInviteState() != InviteState.PENDING) {
+                return ResponseEntity.ok(DefaultResponse.error(400,"이미 가입됌"));
+            }
+
+            // 카테고리Id가 같은지 체크
+            if(!invite.getCategoryId().equals(req.getCategoryId())) {
+                return ResponseEntity.ok(DefaultResponse.error(400,"카테고리 Id 다름"));
             }
 
             // 기간 만료시, 해당 초대 닫고, 기한만료 전달
@@ -85,15 +97,16 @@ public class InviteController {
                 return ResponseEntity.ok(DefaultResponse.error(400,"기한 만료"));
             }
 
+            // inviteKey 가 같고, 파기되지 않았다면 invite 상태 업데이트
             int result = inviteService.updateInviteMemberByUUID(invite.getInviteKey(), email, InviteState.INVITE);
             if(result != 1) {
                 return ResponseEntity.ok(DefaultResponse.error(400,"초대상태 업데이트 실패"));
             }
 
+            // categoryUser에 해당유저 추가를 위해서 유저정보와, 카테고리 정보 find
             Category category = categoryService.findCategoryById(req.getCategoryId());
             Member member = memberService.findByEmail(email).orElseThrow(() -> new RuntimeException("해당 이메일의 사용자를 찾을 수 없음"));
-
-            CategoryUser categoryUser = new CategoryUser(category,member,InviteState.INVITE, CategoryUserRole.USER, CategoryState.ACTIVE);
+            CategoryUser categoryUser = new CategoryUser(category, member, InviteState.INVITE, CategoryUserRole.USER, CategoryState.ACTIVE);
             CategoryUser response = categoryUserRepository.save(categoryUser);
 
             return ResponseEntity.ok(DefaultResponse.success(response));
