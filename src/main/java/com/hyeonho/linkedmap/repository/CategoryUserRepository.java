@@ -21,15 +21,15 @@ public interface CategoryUserRepository extends JpaRepository<CategoryUser, Long
      * @param categoryId
      * @return
      */
-    @Query("SELECT cu.member FROM CategoryUser cu WHERE cu.category.id = :categoryId")
-    List<Member> findMembersByCategoryId(Long categoryId);
+//    @Query("SELECT cu.member FROM CategoryUser cu WHERE cu.category.id = :categoryId")
+//    List<Member> findMembersByCategoryId(Long categoryId);
 
     /**
      * 특정 유저가 속한 카테고리 리턴
      * @param email
      * @return
      */
-    @Query("SELECT CategoryUser cu FROM cu WHERE cu.member.id = :email")
+    @Query("SELECT cu FROM CategoryUser cu WHERE cu.member.email = :email")
     List<CategoryUser> getIncludeCategoryByEmail(String email);
 
 

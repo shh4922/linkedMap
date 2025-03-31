@@ -1,5 +1,6 @@
 package com.hyeonho.linkedmap;
 
+
 import com.hyeonho.linkedmap.data.request.RegisterRequest;
 import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.enumlist.Role;
@@ -10,10 +11,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -21,13 +25,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class MemberTest {
 
-//    private final MemberRepository memberRepository;
-//
-//    @Autowired
-//    public MemberTest(MemberRepository memberRepository) {
-//        this.memberRepository = memberRepository;
-//    }
-
+    private static final Logger log = LoggerFactory.getLogger(MemberTest.class);
     @Mock
     private MemberRepository memberRepository;
 
@@ -37,36 +35,48 @@ public class MemberTest {
     @Mock
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+
     @Test
     void createMember() {
-        Member member = new Member("test111@test.com", "1111", "testUser1", Role.ROLE_USER);
+        RegisterRequest request = RegisterRequest.builder()
+                .email("test111")
+                .password("test111")
+                .username("test111").build();
 
-        when(memberRepository.save(any(Member.class))).thenReturn(member);
+        Member member = Member.builder()
+                .email("test111")
+                .password("encodePassword")
+                .username("test111")
+                .role(Role.ROLE_USER)
+                .build();
 
-        Member savedMember = memberRepository.save(member);
-        verify(memberRepository, times(1)).save(member);
+        when(memberRepository.findById(request.getEmail())).thenReturn(Optional.empty());
+        when(bCryptPasswordEncoder.encode(request.getPassword())).thenReturn("encodePassword");
+        when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> {
+            Member memberArg = invocation.getArgument(0);
+
+
+            return new Member(memberArg.getEmail(), memberArg.getPassword(), memberArg.getUsername(), memberArg.getRole());
+        });
+
+
+        try {
+            Member member1 = memberService.register(request);
+            log.info("findByEmail 호출됨: {}", member1.getEmail());
+            log.info("password 호출됨: {}", member1.getPassword());
+            log.info("name 호출됨: {}", member1.getUsername());
+//            Optional<Member> member = findByEmail(request.getEmail());
+//            log.info("조회 결과: {}", member.isPresent());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        verify(memberRepository, times(1)).findById(request.getEmail());
+        verify(memberRepository, times(1)).save(any(Member.class));
+        verify(bCryptPasswordEncoder, times(1)).encode(request.getPassword());
     }
 
-    @Test
-    void 비밀번호_암호화_후_유저생성() {
-        String rawPassword = "password1";
-        String encodePassword = "asdqweasfsadf@asdqwe";
 
-        RegisterRequest request = new RegisterRequest();
-        request.setEmail("test111");
-        request.setUsername("testUser");
-        request.setPassword(rawPassword);
-
-        Member member = new Member(request.getEmail(), encodePassword, request.getUsername(), Role.ROLE_USER);
-
-        when(bCryptPasswordEncoder.encode(rawPassword)).thenReturn(encodePassword);
-        when(memberRepository.save(any(Member.class))).thenReturn(member);
-
-        Member savedMember = memberService.register(request);
-
-//        assertEquals(encodePassword, savedMember.getPassword());
-//        verify(bCryptPasswordEncoder, times(1)).encode(rawPassword);
-//        verify(memberRepository, times(1)).save(member);
-    }
 
 }

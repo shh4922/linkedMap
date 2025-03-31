@@ -23,6 +23,7 @@ import java.util.List;
 
 @SpringBootTest
 public class CategoryTest {
+
     @Autowired
     private MemberRepository memberRepository;
 
