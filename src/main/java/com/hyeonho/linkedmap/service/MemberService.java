@@ -33,8 +33,15 @@ public class MemberService {
 
         try {
             String password = bCryptPasswordEncoder.encode(request.getPassword());
-            Member member1 = new Member(request.getEmail(), password, request.getUsername(), Role.ROLE_USER);
-            log.info("create member {}", member1);
+            Member member1 = Member.builder()
+                    .email(request.getEmail())
+                    .password(password)
+                    .username(request.getUsername())
+                    .role(Role.ROLE_USER)
+                    .build();
+//            log.info("create member {}", member1);
+//            Member member2 = memberRepository.save(member1);
+//            log.info("saved member {}", member2);
             return memberRepository.save(member1);
         } catch (DatabaseException e) {
             throw new DatabaseException("회원가입-디비오류");

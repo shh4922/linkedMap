@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -39,25 +40,29 @@ public class MemberTest {
     @Test
     void createMember() {
         RegisterRequest request = RegisterRequest.builder()
-                .email("test111")
-                .password("test111")
-                .username("test111").build();
+                .email("test999")
+                .password("test999")
+                .username("test999").build();
+
+//        log.info("request {}", request.getEmail());
+//        log.info("request {}", request.getUsername());
+//        log.info("request {}", request.getUsername());
 
         Member member = Member.builder()
-                .email("test111")
+                .email("test999")
                 .password("encodePassword")
-                .username("test111")
+                .username("test999")
                 .role(Role.ROLE_USER)
                 .build();
+//        log.info("resultMember {}", member.getPassword());
+//        log.info("resultMember {}", member.getUsername());
+//        log.info("resultMember {}", member.getEmail());
+//        log.info("resultMember {}", member.getRole());
+
 
         when(memberRepository.findById(request.getEmail())).thenReturn(Optional.empty());
         when(bCryptPasswordEncoder.encode(request.getPassword())).thenReturn("encodePassword");
-        when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> {
-            Member memberArg = invocation.getArgument(0);
-
-
-            return new Member(memberArg.getEmail(), memberArg.getPassword(), memberArg.getUsername(), memberArg.getRole());
-        });
+        when(memberRepository.save(any(Member.class))).thenReturn(member);
 
 
         try {
@@ -65,8 +70,12 @@ public class MemberTest {
             log.info("findByEmail 호출됨: {}", member1.getEmail());
             log.info("password 호출됨: {}", member1.getPassword());
             log.info("name 호출됨: {}", member1.getUsername());
-//            Optional<Member> member = findByEmail(request.getEmail());
-//            log.info("조회 결과: {}", member.isPresent());
+
+            // 추가된 부분: member1이 member와 동일한지 확인
+            assertEquals(member.getEmail(), member1.getEmail());
+            assertEquals(member.getPassword(), member1.getPassword());
+            assertEquals(member.getUsername(), member1.getUsername());
+            assertEquals(member.getRole(), member1.getRole());
 
         } catch (Exception e) {
             e.printStackTrace();
