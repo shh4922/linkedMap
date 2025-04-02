@@ -34,7 +34,7 @@ public class InviteService {
 
     public int updateInviteStateByUUID(UUID inviteKey, InviteState inviteState) {
         try {
-            return inviteRepository.updateInviteStateByUUID(inviteState, inviteKey);
+            return inviteRepository.updateInviteStateByUUID(inviteState.name(), inviteKey);
         } catch (DatabaseException e) {
             throw new DatabaseException(e.getMessage());
         }
@@ -42,7 +42,7 @@ public class InviteService {
 
     public int updateInviteMemberByUUID(UUID inviteKey, String email, InviteState inviteState) {
         try {
-            return inviteRepository.updateInviteMemberByUUID(inviteState, email, inviteKey);
+            return inviteRepository.updateInviteMemberByUUID(inviteState.name(), email, inviteKey);
         } catch (DatabaseException e) {
             throw new DatabaseException(e.getMessage());
         }

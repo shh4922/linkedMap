@@ -15,6 +15,9 @@ import com.hyeonho.linkedmap.service.CategoryService;
 import com.hyeonho.linkedmap.service.InviteService;
 import com.hyeonho.linkedmap.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -34,7 +37,7 @@ public class InviteController {
     private final CategoryUserRepository categoryUserRepository;
     private final CategoryService categoryService;
     private final MemberService memberService;
-
+    private static final Logger log = LoggerFactory.getLogger(InviteController.class);
     /**
      * 초대 링크 생성
      * @param headers
@@ -81,6 +84,7 @@ public class InviteController {
             String email = jwtProvider.getUsernameFromToken(authorization);
 
             // 초대 uuid 가 있는지 체크
+            log.info("invite {}",req.getInviteKey());
             Invite invite = inviteService.findInviteByUUID(req.getInviteKey());
             if(invite == null) {
                 return ResponseEntity.ok(DefaultResponse.error(410,"없는 초대링크임"));

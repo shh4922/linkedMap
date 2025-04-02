@@ -72,6 +72,14 @@ public class CategoryService {
     }
 
 
+    /**
+     * 자신의 카테고리 삭제
+     * 삭제시, 카테고리에 속한 유저들은 카테고리 상태가 delete로 바뀜
+     * 본은은
+     * @param email
+     * @param categoryId
+     * @return
+     */
     @Transactional
     public Category deleteCategory(String email, Long categoryId) {
         try {

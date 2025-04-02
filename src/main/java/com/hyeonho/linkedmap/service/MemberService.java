@@ -5,8 +5,12 @@ import com.hyeonho.linkedmap.config.RefreshToken;
 import com.hyeonho.linkedmap.controller.MemberController;
 import com.hyeonho.linkedmap.data.dto.LoginResponseDTO;
 import com.hyeonho.linkedmap.data.request.LoginRequestDTO;
+import com.hyeonho.linkedmap.data.request.MemberUpdateRequest;
 import com.hyeonho.linkedmap.data.request.RegisterRequest;
+import com.hyeonho.linkedmap.entity.Category;
+import com.hyeonho.linkedmap.entity.CategoryUser;
 import com.hyeonho.linkedmap.entity.Member;
+import com.hyeonho.linkedmap.enumlist.CategoryUserRole;
 import com.hyeonho.linkedmap.enumlist.Role;
 import com.hyeonho.linkedmap.error.DatabaseException;
 import com.hyeonho.linkedmap.error.DuplicateMemberException;
@@ -16,12 +20,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+    private final CategoryService categoryService;
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTProvider jwtProvider;
@@ -76,5 +83,34 @@ public class MemberService {
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
                     .build();
+    }
+
+    @Transactional
+    public Member updateMemberInfo(Member member, MemberUpdateRequest request) {
+        member.update(request.getUsername());
+        return member;
+    }
+
+    @Transactional
+    public Member deleteMember(String email) {
+        Member member = findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("해당 계정 없음"));
+
+        /** 맴버 delete 상태 변경*/
+        member.delete();
+
+        /** 내가 속한 카테고리 조회*/
+        List<CategoryUser> categoryList = categoryService.getIncludeCategoryByEmail(member.getEmail());
+
+        categoryList.forEach(categoryUser -> {
+            if(categoryUser.getCategoryUserRole() == CategoryUserRole.OWNER) { // 본인이 만든거면 카테고리 삭제
+                categoryService.deleteCategory(member.getEmail(), categoryUser.getCategory().getId());
+            } else { // 다른 카테고리에 속한거라면 나가기 처리
+                categoryService.getOutCategory(member.getEmail(), categoryUser.getCategory().getId());
+            }
+        });
+
+
+        return member;
     }
 }

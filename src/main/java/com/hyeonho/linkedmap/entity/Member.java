@@ -56,4 +56,14 @@ public class Member {
         this.updatedAt = LocalDateTime.now();
     }
 
+
+    public void update(String username) {
+        if(username != null) {
+            this.username = username;
+        }
+    }
+
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }
