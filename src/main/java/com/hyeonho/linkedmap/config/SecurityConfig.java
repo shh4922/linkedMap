@@ -49,7 +49,6 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(permitAllWhiteList).permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/user").hasRole(Role.ROLE_ADMIN.value())
                 // 그 외 요청 체크
                 .anyRequest().authenticated()
         );

@@ -7,5 +7,4 @@ import lombok.Setter;
 @Setter
 public class DeleteCategoryReq {
     private Long categoryId;
-    private String email;
 }

@@ -68,7 +68,8 @@ public class CategoryService {
 
 
     public List<CategoryUser> getIncludeCategoryByEmail(String email) {
-        return categoryUserRepository.getIncludeCategoryByEmail(email);
+//        return categoryUserRepository.getIncludeCategoryByEmail(email);
+        return categoryUserRepository.findByMember_Email(email);
     }
 
 
@@ -94,7 +95,7 @@ public class CategoryService {
 
             // TODO: 삭제 성공후 카테고리유저에 있는 해당 카테고리에 속한 유저의 카테고리 상태를 DELETE로 업데이트 해줘야함. 벌크연산필요.
             if(saveCategory(category).isPresent()) {
-                categoryUserRepository.updateCategoryStatusToDelete(categoryId,CategoryState.DELETE.name()); // categoryUser에 있는 해당카테고리 상태 삭제됌 으로 변경
+                categoryUserRepository.updateCategoryStatusToDelete(CategoryState.DELETE, categoryId); // categoryUser에 있는 해당카테고리 상태 삭제됌 으로 변경
                 getOutCategory(email,categoryId);
             }
 
@@ -108,7 +109,7 @@ public class CategoryService {
     public int getOutCategory(String email, Long categoryId) {
         try {
             // 삭제한 유저 초대상태 나감으로 변경
-            return categoryUserRepository.updateInviteStatusToDelete(categoryId,email,InviteState.GETOUT.name());
+            return categoryUserRepository.updateInviteStatusToDelete(InviteState.GETOUT, categoryId, email);
         } catch (DatabaseException e) {
             throw new DatabaseException("카테고리 나가기 에러");
         }

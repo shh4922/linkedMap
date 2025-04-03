@@ -21,10 +21,10 @@ public interface InviteRepository extends JpaRepository<Invite, Long> {
     @Transactional
     @Modifying
     @Query("UPDATE Invite in SET in.inviteState = :inviteState WHERE in.inviteKey = :inviteKey")
-    int updateInviteStateByUUID(String inviteState, UUID inviteKey);
+    int updateInviteStateByUUID(InviteState inviteState, UUID inviteKey);
 
     @Transactional
     @Modifying
     @Query("UPDATE Invite in SET in.inviteState = :inviteState, in.invitedMember = :email WHERE in.inviteKey = :inviteKey")
-    int updateInviteMemberByUUID(@Param("inviteState") String inviteState, @Param("email") String email, @Param("inviteKey") UUID inviteKey);
+    int updateInviteMemberByUUID(@Param("inviteState")InviteState inviteState, @Param("email")String email, @Param("inviteKey")UUID inviteKey);
 }
