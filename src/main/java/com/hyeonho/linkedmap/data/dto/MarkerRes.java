@@ -31,7 +31,7 @@ public class MarkerRes {
                 marker.getLng(),
                 marker.getTitle(),
                 marker.getDescription(),
-                marker.getMemberId().getUsername()
+                marker.getMember().getUsername()
         );
     }
 }

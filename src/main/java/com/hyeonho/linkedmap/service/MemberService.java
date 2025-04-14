@@ -11,13 +11,16 @@ import com.hyeonho.linkedmap.entity.Category;
 import com.hyeonho.linkedmap.entity.CategoryUser;
 import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.enumlist.CategoryUserRole;
+import com.hyeonho.linkedmap.enumlist.InviteState;
 import com.hyeonho.linkedmap.enumlist.Role;
 import com.hyeonho.linkedmap.error.DatabaseException;
 import com.hyeonho.linkedmap.error.DuplicateMemberException;
+import com.hyeonho.linkedmap.error.InvalidRequestException;
 import com.hyeonho.linkedmap.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,9 +49,7 @@ public class MemberService {
                     .username(request.getUsername())
                     .role(Role.ROLE_USER)
                     .build();
-//            log.info("create member {}", member1);
-//            Member member2 = memberRepository.save(member1);
-//            log.info("saved member {}", member2);
+
             return memberRepository.save(member1);
         } catch (DatabaseException e) {
             throw new DatabaseException("회원가입-디비오류");
@@ -56,18 +57,19 @@ public class MemberService {
     }
 
     public Optional<Member> findByEmail(String email) {
-        return memberRepository.findById(email); // orElseThrow() 제거
+        return memberRepository.findByEmailAndDeletedAtIsNull(email);
     }
 
 
     public LoginResponseDTO login(final LoginRequestDTO loginRequestDTO) {
 
         Member userInfo = findByEmail(loginRequestDTO.getEmail())
-                .orElseThrow(() -> new RuntimeException("해당 계정 없음"));
+                .orElseThrow(() ->  new InvalidRequestException("해당 계정 없음."));
 
         // password 일치 여부 체크
-        if(!bCryptPasswordEncoder.matches(loginRequestDTO.getPassword(), userInfo.getPassword()))
-            throw new RuntimeException("비밀번호 틀림");
+        if(!bCryptPasswordEncoder.matches(loginRequestDTO.getPassword(), userInfo.getPassword())) {
+            throw new InvalidRequestException("비밀번호 틀림");
+        }
 
         // jwt 토큰 생성
         String accessToken = jwtProvider.generateAccessToken(userInfo.getEmail());
@@ -100,7 +102,7 @@ public class MemberService {
         member.delete();
 
         /** 내가 속한 카테고리 조회*/
-        List<CategoryUser> categoryList = categoryService.getIncludeCategoryByEmail(member.getEmail());
+        List<CategoryUser> categoryList = categoryService.getIncludeCategoryByEmail(member.getEmail(), InviteState.INVITE);
 
         categoryList.forEach(categoryUser -> {
             if(categoryUser.getCategoryUserRole() == CategoryUserRole.OWNER) { // 본인이 만든거면 카테고리 삭제

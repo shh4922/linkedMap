@@ -14,6 +14,7 @@ import com.hyeonho.linkedmap.entity.Category;
 import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.error.DatabaseException;
 import com.hyeonho.linkedmap.error.DuplicateMemberException;
+import com.hyeonho.linkedmap.error.InvalidRequestException;
 import com.hyeonho.linkedmap.service.MemberService;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +53,7 @@ public class MemberController {
     /**
      * 로그인
      * 이메일이랑 비밀번호 받음.
+     * 탈퇴한 회원일떄의 처리
      * @param request
      * @return 응답은 access, refresh 토큰 던짐
      */
@@ -66,17 +69,10 @@ public class MemberController {
     /**
      * 내 정보 조회
      * 내 정보 찾은후, 이메일, 이름, 역할만 리턴함
-     * @param headers
      * @return 이메일, 이름, 역할 리턴
      */
     @GetMapping("/user/my")
-    public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMyInfo(@RequestHeader HttpHeaders headers) {
-        String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
-
-        if(authorization == null) return ResponseEntity.badRequest().body(DefaultResponse.error(400, "내정보 받아오는데 실패함"));
-
-
-        String email = jwtProvider.getUsernameFromToken(authorization);
+    public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMyInfo(@AuthenticationPrincipal String email) {
         Member member = memberService.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("해당 이메일의 사용자를 찾을 수 없음"));
 
@@ -90,26 +86,14 @@ public class MemberController {
     /**
      * 유저 정보 조회
      * 유저 email 로 정보 조회함
-     * @param headers
      * @param email
      * @return 이름, 이메일, 역할 리턴함
      */
     @GetMapping("/users/info")
-    public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMemberInfoByEmail(@RequestHeader HttpHeaders headers, @RequestParam String email) {
-
-        String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
-        if(authorization == null) {
-            return ResponseEntity.badRequest()
-                    .body(DefaultResponse.error(402, "토큰없음"));
-        }
-
+    public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMemberInfoByEmail(@RequestParam(value = "email") String email) {
         Member member = memberService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("해당 이메일의 사용자를 찾을 수 없음"));
+                .orElseThrow(() -> new InvalidRequestException("해당 유저를 찾을 수 없음"));
 
-        if(member == null){
-            return ResponseEntity.badRequest()
-                    .body(DefaultResponse.error(400, "해당유저 없음"));
-        }
 
         MemberInfoDTO res = new MemberInfoDTO();
         res.setEmail(member.getEmail());
@@ -121,21 +105,13 @@ public class MemberController {
     /**
      * 유저 정보 수정
      * 그런데 수정할게 이름말고는 없음 ㅅㅂ;;
-     * @param headers
      * @param request
      * @return
      */
     @PatchMapping("/user/info")
-    public ResponseEntity<DefaultResponse<MemberUpdateDto>> updateMemberInfo(@RequestHeader HttpHeaders headers, MemberUpdateRequest request) {
-        String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
-        if(authorization == null) {
-            return ResponseEntity.badRequest()
-                    .body(DefaultResponse.error(402, "토큰없음"));
-        }
-
-        String email = jwtProvider.getUsernameFromToken(authorization);
+    public ResponseEntity<DefaultResponse<MemberUpdateDto>> updateMemberInfo(@AuthenticationPrincipal String email, MemberUpdateRequest request) {
         Member member = memberService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("해당 이메일의 사용자를 찾을 수 없음"));
+                .orElseThrow(() -> new InvalidRequestException("해당 유저를 찾을 수 없음"));
 
         Member updatedMember = memberService.updateMemberInfo(member,request);
         MemberUpdateDto memberUpdateDto = new MemberUpdateDto();
@@ -155,15 +131,9 @@ public class MemberController {
      * 내가 속한 카테고리는 나가기 처리 해야함.
      */
     @DeleteMapping("/user/delete")
-    public ResponseEntity<DefaultResponse<MemberDeleteDto>> deleteMember(@RequestHeader HttpHeaders headers) {
-        String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
-        if(authorization == null) {
-            return ResponseEntity.badRequest()
-                    .body(DefaultResponse.error(402, "토큰없음"));
-        }
-
-        String email = jwtProvider.getUsernameFromToken(authorization);
+    public ResponseEntity<DefaultResponse<MemberDeleteDto>> deleteMember(@AuthenticationPrincipal String email) {
         Member member = memberService.deleteMember(email);
+
         if(member.getDeletedAt() != null) {
             MemberDeleteDto deleteDto = MemberDeleteDto.builder()
                     .username(member.getUsername())

@@ -12,6 +12,7 @@ import java.util.UUID;
 
 public interface InviteRepository extends JpaRepository<Invite, Long> {
 
+    /** UUID 로 초대링크 찾기*/
     @Query("SELECT in FROM Invite in WHERE in.inviteKey = :inviteKey")
     Invite findInviteByUUID(@Param("inviteKey")UUID inviteKey);
 

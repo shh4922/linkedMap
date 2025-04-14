@@ -1,8 +1,7 @@
 package com.hyeonho.linkedmap.service;
 
-import com.hyeonho.linkedmap.data.DefaultResponse;
+import com.hyeonho.linkedmap.data.request.CategoryUpdateReq;
 import com.hyeonho.linkedmap.data.request.CreateCategoryReq;
-import com.hyeonho.linkedmap.data.request.DeleteCategoryReq;
 import com.hyeonho.linkedmap.entity.Category;
 import com.hyeonho.linkedmap.entity.CategoryState;
 import com.hyeonho.linkedmap.entity.CategoryUser;
@@ -10,16 +9,14 @@ import com.hyeonho.linkedmap.entity.Member;
 import com.hyeonho.linkedmap.enumlist.CategoryUserRole;
 import com.hyeonho.linkedmap.enumlist.InviteState;
 import com.hyeonho.linkedmap.error.DatabaseException;
-import com.hyeonho.linkedmap.error.DuplicateMemberException;
+import com.hyeonho.linkedmap.error.InvalidRequestException;
 import com.hyeonho.linkedmap.repository.CategoryRepository;
 import com.hyeonho.linkedmap.repository.CategoryUserRepository;
 import com.hyeonho.linkedmap.repository.MemberRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -63,13 +60,13 @@ public class CategoryService {
     }
 
     public Category findCategoryById(Long categoryId) {
-        return categoryRepository.findById(categoryId).orElseThrow();
+        return categoryRepository.findByIdAndDeletedAtIsNull(categoryId);
     }
 
 
-    public List<CategoryUser> getIncludeCategoryByEmail(String email) {
-//        return categoryUserRepository.getIncludeCategoryByEmail(email);
-        return categoryUserRepository.findByMember_Email(email);
+    public List<CategoryUser> getIncludeCategoryByEmail(String email, InviteState inviteState) {
+        return categoryUserRepository.getIncludeCategoryByEmail(email, inviteState);
+//        return categoryUserRepository.findByMember_Email(email);
     }
 
 
@@ -87,17 +84,15 @@ public class CategoryService {
             Category category = findCategoryById(categoryId);
 
             if(!category.getOwner().getEmail().equals(email)) {
-                ResponseEntity.badRequest()
-                        .body(DefaultResponse.error(400, "카테고리 소유자 아니면 삭제못함"));
+                throw new InvalidRequestException("카테고리 소유자 아니면 삭제못함");
             }
 
             category.delete();
 
             // TODO: 삭제 성공후 카테고리유저에 있는 해당 카테고리에 속한 유저의 카테고리 상태를 DELETE로 업데이트 해줘야함. 벌크연산필요.
-            if(saveCategory(category).isPresent()) {
-                categoryUserRepository.updateCategoryStatusToDelete(CategoryState.DELETE, categoryId); // categoryUser에 있는 해당카테고리 상태 삭제됌 으로 변경
-                getOutCategory(email,categoryId);
-            }
+            categoryUserRepository.updateCategoryStatusToDelete(CategoryState.DELETE, categoryId); // categoryUser에 있는 해당카테고리 상태 삭제됌 으로 변경
+            getOutCategory(email,categoryId);
+
 
             return category;
         } catch (DatabaseException e) {
@@ -113,6 +108,17 @@ public class CategoryService {
         } catch (DatabaseException e) {
             throw new DatabaseException("카테고리 나가기 에러");
         }
+    }
+
+    @Transactional
+    public Category updateCategory(String email, CategoryUpdateReq req) {
+        Category category = findCategoryById(req.getCategoryId());
+        if(!category.getOwner().getEmail().equals(email)) {
+            throw new InvalidRequestException("해당 카테고리 소유자가 아닙니다.");
+        }
+
+        category.update(req);
+        return category;
     }
 
 
