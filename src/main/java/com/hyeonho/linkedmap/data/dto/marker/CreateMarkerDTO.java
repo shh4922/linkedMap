@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 public class CreateMarkerDTO {
@@ -17,13 +18,14 @@ public class CreateMarkerDTO {
     private String roadAddress;
     private String storeType;
     private String imageUrl;
-    private String createdBy; // 작성자 email
+    private String creator; // 작성자 email
     private Long categoryId;
+    private LocalDateTime createdAt;
 
     @Builder
     public CreateMarkerDTO(Long id, BigDecimal lat, BigDecimal lng, String title,
                           String description, String address, String roadAddress,
-                          String storeType, String imageUrl, String createdBy, Long categoryId) {
+                          String storeType, String imageUrl, String creator, LocalDateTime createdAt, Long categoryId) {
         this.id = id;
         this.lat = lat;
         this.lng = lng;
@@ -33,7 +35,8 @@ public class CreateMarkerDTO {
         this.roadAddress = roadAddress;
         this.storeType = storeType;
         this.imageUrl = imageUrl;
-        this.createdBy = createdBy;
+        this.creator = creator;
+        this.createdAt = createdAt;
         this.categoryId = categoryId;
     }
 
@@ -48,7 +51,8 @@ public class CreateMarkerDTO {
                 .roadAddress(marker.getRoadAddress())
                 .storeType(marker.getStoreType())
                 .imageUrl(marker.getImageUrl())
-                .createdBy(marker.getMember().getEmail())
+                .creator(marker.getMember().getEmail())
+                .createdAt(marker.getCreatedAt())
                 .categoryId(marker.getCategory().getId())
                 .build();
     }

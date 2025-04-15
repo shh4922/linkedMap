@@ -81,36 +81,81 @@ public class MarkerService {
 
     @Transactional
     public CreateMarkerDTO updateMarker(String email, UpdateMarkerRequest req) {
-        Marker marker = markerRepository.findById(req.getId())
-                .orElseThrow(() -> new InvalidRequestException("해당Id의 마커를 찾을수 없음"));
+        Marker marker = findMarkerById(req.getId());
 
-        CategoryUser creator = categoryUserRepository.getCategoryUserByEmailAndCategoryId(marker.getMember().getEmail(), marker.getCategory().getId(), CategoryState.ACTIVE)
-                .orElseThrow(() -> new InvalidRequestException("마커 생성자가 카테고리에 속해있지 않습니다."));
+        String creatorEmail = marker.getMember().getEmail();
 
+        boolean isPermission = checkMarkerPermission(email, creatorEmail, marker.getCategory().getId());
 
-        if(email.equals(marker.getMember().getEmail())) { // 내가 만든 경우
-            marker.update(req);
-        }
-        else { // 내가 만든게 아닌경우
-            CategoryUser me = categoryUserRepository.getCategoryUserByEmailAndCategoryId(email, marker.getCategory().getId(), CategoryState.ACTIVE)
-                    .orElseThrow(() -> new InvalidRequestException("해당 카테고리 소속이 아닙니다."));
+        if(!isPermission) { throw new PermissionException("권한이 없습니다");}
 
-            CategoryUserRole myRole = me.getCategoryUserRole();
-            CategoryUserRole creatorRole = creator.getCategoryUserRole();
+        marker.update(req);
 
-            // 업데이트 가능 조건
-            if(myRole.equals(CategoryUserRole.OWNER)) { // 내가 방장인 경우
-                marker.update(req);
-            } else if ( myRole.equals(CategoryUserRole.MANAGER) && // 내가 매니저고 만든애가 나보다 권한이 낮은경우
-                    (creatorRole.equals(CategoryUserRole.USER) ||creatorRole.equals(CategoryUserRole.READ_ONLY))
-            ) {
-                marker.update(req);
-            } else {
-                throw new PermissionException("마커를 수정할 권한이 없습니다.");
-            }
-        }
         return CreateMarkerDTO.from(marker);
     }
+
+    @Transactional
+    public Marker deleteMarker(String email, Long markerId) {
+        Marker marker = findMarkerById(markerId);
+
+        boolean isPermission = checkMarkerPermission(email,marker.getMember().getEmail(), marker.getCategory().getId());
+
+        if(!isPermission) { throw new PermissionException("권한이 없습니다");}
+
+        marker.delete();
+        return marker;
+    }
+
+    private Marker findMarkerById(Long markerId) {
+        return markerRepository.findByIdAndDeletedAtIsNull(markerId)
+                .orElseThrow(() -> new InvalidRequestException("해당Id의 마커를 찾을수 없음"));
+    }
+
+
+    /** 권한 체크
+     * 방장, 내가 생성한 마커, 나보다 권한이 낮은경우: true
+     * 나머지 false
+     * */
+    private boolean checkMarkerPermission(String myEmail, String creatorEmail, Long categoryId) {
+        CategoryUser me = categoryUserRepository.getCategoryUserByEmailAndCategoryId(myEmail, categoryId, CategoryState.ACTIVE)
+                .orElseThrow(() -> new InvalidRequestException("마커 생성자가 카테고리에 속해있지 않습니다."));
+
+        CategoryUser creator = categoryUserRepository.getCategoryUserByEmailAndCategoryId(creatorEmail, categoryId, CategoryState.ACTIVE)
+                .orElseThrow(() -> new InvalidRequestException("해당 카테고리 소속이 아닙니다."));
+
+        CategoryUserRole myPermission = me.getCategoryUserRole();
+
+        // 내가 방장인 경우 필터링
+        if(myPermission.equals(CategoryUserRole.OWNER)) {
+            return true;
+        }
+
+        // 내가 생성자인 경우 필터링
+        if(me.getMember().getEmail().equals(creator.getMember().getEmail())) {
+            return true;
+        }
+
+        // 일반 유저, ReadOnly 필터링
+        if(!myPermission.equals(CategoryUserRole.MANAGER)) {
+            return false;
+        }
+
+        // 방장이 만든경우 필터링
+        if(creator.getCategoryUserRole().equals(CategoryUserRole.OWNER)) {
+            return false;
+        }
+
+        // 같은 매니저의 경우 필터링
+        if(creator.getCategoryUserRole().equals(CategoryUserRole.MANAGER)) {
+            return false;
+        }
+
+        // 나는 매니저이고, 생성자는 일반유저나, readOnly 인 경우 필터링
+        return true;
+
+    }
+
+
 
 
 

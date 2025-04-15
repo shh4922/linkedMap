@@ -46,6 +46,13 @@ public class MarkerController {
 
     @PutMapping("/marker/update")
     public ResponseEntity<DefaultResponse<CreateMarkerDTO>> updateMarker(@AuthenticationPrincipal String email, @RequestBody UpdateMarkerRequest req) {
+        CreateMarkerDTO markerDTO = markerService.updateMarker(email, req);
+        return ResponseEntity.ok(DefaultResponse.success(markerDTO));
+    }
 
+    @DeleteMapping("/marker/{markerId}")
+    public ResponseEntity<DefaultResponse<Marker>> deleteMarker(@AuthenticationPrincipal String email, @PathVariable(value = "markerId") Long markerId) {
+        Marker marker = markerService.deleteMarker(email,markerId);
+        return ResponseEntity.ok(DefaultResponse.success(marker));
     }
 }

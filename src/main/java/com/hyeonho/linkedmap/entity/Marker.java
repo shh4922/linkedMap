@@ -1,6 +1,5 @@
 package com.hyeonho.linkedmap.entity;
 
-import com.hyeonho.linkedmap.data.request.CategoryUpdateReq;
 import com.hyeonho.linkedmap.data.request.CreateMarkerRequest;
 import com.hyeonho.linkedmap.data.request.marker.UpdateMarkerRequest;
 import jakarta.persistence.*;
@@ -114,5 +113,8 @@ public class Marker {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
 
 }

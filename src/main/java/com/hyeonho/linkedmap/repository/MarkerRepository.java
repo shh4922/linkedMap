@@ -7,10 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MarkerRepository extends JpaRepository<Marker, Long> {
 
     /** 마커리스트 조회. 삭제된건 조회하지않음. */
     @Query("SELECT ma FROM Marker ma WHERE ma.category.id = :categoryId AND ma.deletedAt IS NULL")
     List<Marker> getMarkerList(@Param("categoryId") Long categoryId);
+
+    Optional<Marker> findByIdAndDeletedAtIsNull(Long id);
 }
