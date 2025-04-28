@@ -1,6 +1,6 @@
 package com.hyeonho.linkedmap.enumlist;
 
-public enum CategoryUserRole {
+public enum RoomMemberRole {
     OWNER("OWNER"), /**말해뭐해 모든권한 다 있음 ㅋㅋ*/
 
     MANAGER("MANAGER"),  /** 마커 추가, 수정, 삭제(all), 마커 추가, 수정, 삭제, 초대링크 생성, 유저추방(자신과같은 등급orOnwer는 추방 불가)*/
@@ -11,7 +11,7 @@ public enum CategoryUserRole {
 
     String categoryUserRole;
 
-    CategoryUserRole(String categoryUserRole) {
+    RoomMemberRole(String categoryUserRole) {
         this.categoryUserRole = categoryUserRole;
     }
 

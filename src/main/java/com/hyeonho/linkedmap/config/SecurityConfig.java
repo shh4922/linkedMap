@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -56,6 +57,7 @@ public class SecurityConfig {
         http.formLogin(AbstractHttpConfigurer::disable); // 기본 로그인 폼 비활성화
         http.logout(AbstractHttpConfigurer::disable); // 기본 로그아웃 기능 비활성화
         http.csrf(AbstractHttpConfigurer::disable); // CSRF 보호 비활성화 (restapi는 필요없음)
+        http.cors(Customizer.withDefaults());
 
         http.sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 미사용

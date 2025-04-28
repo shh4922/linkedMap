@@ -1,4 +1,4 @@
-package com.hyeonho.linkedmap.data.dto;
+package com.hyeonho.linkedmap.data.dto.member;
 
 import lombok.Builder;
 import lombok.Getter;

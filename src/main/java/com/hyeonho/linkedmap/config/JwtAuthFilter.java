@@ -28,10 +28,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtAuthFilter.class);
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        final String token = request.getHeader("Authorization");
+        final String authHeader = request.getHeader("Authorization");
+        String token = null;
+//                request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+        }
+
 
         String username = null;
         log.info("JwtAuthFilter :{}", request.getRequestURL());
+
         if (request.getRequestURI().startsWith("/api/v1/login") ||
                 request.getRequestURI().startsWith("/api/v1/register") ||
                 request.getRequestURI().startsWith("/api/v1/kakao/auth") ||

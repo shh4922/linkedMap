@@ -1,15 +1,13 @@
 package com.hyeonho.linkedmap;
 
-import com.hyeonho.linkedmap.data.request.CategoryUpdateReq;
-import com.hyeonho.linkedmap.data.request.DeleteCategoryReq;
-import com.hyeonho.linkedmap.entity.Category;
-import com.hyeonho.linkedmap.entity.CategoryState;
-import com.hyeonho.linkedmap.entity.CategoryUser;
+import com.hyeonho.linkedmap.entity.Room;
+import com.hyeonho.linkedmap.entity.RoomState;
+import com.hyeonho.linkedmap.entity.RoomMember;
 import com.hyeonho.linkedmap.entity.Member;
-import com.hyeonho.linkedmap.enumlist.CategoryUserRole;
+import com.hyeonho.linkedmap.enumlist.RoomMemberRole;
 import com.hyeonho.linkedmap.enumlist.InviteState;
-import com.hyeonho.linkedmap.repository.CategoryRepository;
-import com.hyeonho.linkedmap.repository.CategoryUserRepository;
+import com.hyeonho.linkedmap.repository.RoomRepository;
+import com.hyeonho.linkedmap.repository.RoomMemberRepository;
 import com.hyeonho.linkedmap.repository.MarkerRepository;
 import com.hyeonho.linkedmap.repository.MemberRepository;
 import org.junit.jupiter.api.Test;
@@ -18,36 +16,34 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
-
 
 @SpringBootTest
-public class CategoryTest {
+public class RoomTest {
 
     @Autowired
     private MemberRepository memberRepository;
 
     @Autowired
-    private CategoryRepository categoryRepository;
+    private RoomRepository roomRepository;
 
     @Autowired
-    private CategoryUserRepository categoryUserRepository;
+    private RoomMemberRepository roomMemberRepository;
 
     @Autowired
     private MarkerRepository markerRepository;
-    private static final Logger log = LoggerFactory.getLogger(CategoryTest.class);
+    private static final Logger log = LoggerFactory.getLogger(RoomTest.class);
 
 
-    @Test
-    public void 카테고리생성() {
-        Member member = memberRepository.findById("test222@test.com").orElseThrow();
-
-        Category category = new Category(member,"카테고리2");
-        categoryRepository.save(category);
-
-        CategoryUser categoryUser = new CategoryUser(category, member, InviteState.INVITE, CategoryUserRole.OWNER, CategoryState.ACTIVE);
-        categoryUserRepository.save(categoryUser);
-    }
+//    @Test
+//    public void 카테고리생성() {
+//        Member member = memberRepository.findById("test222@test.com").orElseThrow();
+//
+//        Room room = new Room(member,"카테고리2");
+//        roomRepository.save(room);
+//
+//        RoomMember roomMember = new RoomMember(room, member, InviteState.INVITE, RoomMemberRole.OWNER, RoomState.ACTIVE);
+//        roomMemberRepository.save(roomMember);
+//    }
 
 //    @Test
 //    public void 유저가속한_카테고리_리스트조회() {

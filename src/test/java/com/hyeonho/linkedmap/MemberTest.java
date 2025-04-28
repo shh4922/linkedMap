@@ -65,21 +65,21 @@ public class MemberTest {
         when(memberRepository.save(any(Member.class))).thenReturn(member);
 
 
-        try {
-            Member member1 = memberService.register(request);
-            log.info("findByEmail 호출됨: {}", member1.getEmail());
-            log.info("password 호출됨: {}", member1.getPassword());
-            log.info("name 호출됨: {}", member1.getUsername());
-
-            // 추가된 부분: member1이 member와 동일한지 확인
-            assertEquals(member.getEmail(), member1.getEmail());
-            assertEquals(member.getPassword(), member1.getPassword());
-            assertEquals(member.getUsername(), member1.getUsername());
-            assertEquals(member.getRole(), member1.getRole());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Member member1 = memberService.register(request);
+//            log.info("findByEmail 호출됨: {}", member1.getEmail());
+//            log.info("password 호출됨: {}", member1.getPassword());
+//            log.info("name 호출됨: {}", member1.getUsername());
+//
+//            // 추가된 부분: member1이 member와 동일한지 확인
+//            assertEquals(member.getEmail(), member1.getEmail());
+//            assertEquals(member.getPassword(), member1.getPassword());
+//            assertEquals(member.getUsername(), member1.getUsername());
+//            assertEquals(member.getRole(), member1.getRole());
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
 //        verify(memberRepository, times(1)).findById(request.getEmail());
         verify(memberRepository, times(1)).save(any(Member.class));

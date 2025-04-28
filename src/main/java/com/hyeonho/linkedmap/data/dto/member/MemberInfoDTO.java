@@ -1,4 +1,4 @@
-package com.hyeonho.linkedmap.data.dto;
+package com.hyeonho.linkedmap.data.dto.member;
 import com.hyeonho.linkedmap.enumlist.Role;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,5 +8,5 @@ import lombok.Setter;
 public class MemberInfoDTO {
     private String email;
     private String username;
-    private Role role;
+    private String role;
 }

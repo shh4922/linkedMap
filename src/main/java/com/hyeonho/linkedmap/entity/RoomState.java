@@ -1,6 +1,6 @@
 package com.hyeonho.linkedmap.entity;
 
-public enum CategoryState {
+public enum RoomState {
     ACTIVE("ACTIVE"), // 활성화
 
 
@@ -14,7 +14,7 @@ public enum CategoryState {
 
     final String categoryState;
 
-    CategoryState(String categoryState) {
+    RoomState(String categoryState) {
         this.categoryState = categoryState;
     }
 }

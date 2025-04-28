@@ -1,14 +1,9 @@
 package com.hyeonho.linkedmap.controller;
 
 import com.hyeonho.linkedmap.data.DefaultResponse;
-import com.hyeonho.linkedmap.data.dto.MarkerRes;
 import com.hyeonho.linkedmap.data.dto.marker.CreateMarkerDTO;
-import com.hyeonho.linkedmap.data.request.CategoryUpdateReq;
 import com.hyeonho.linkedmap.data.request.CreateMarkerRequest;
-import com.hyeonho.linkedmap.data.request.DeleteMarkerReq;
-import com.hyeonho.linkedmap.data.request.MarkerReq;
 import com.hyeonho.linkedmap.data.request.marker.UpdateMarkerRequest;
-import com.hyeonho.linkedmap.entity.CategoryUser;
 import com.hyeonho.linkedmap.entity.Marker;
 import com.hyeonho.linkedmap.service.MarkerService;
 import lombok.RequiredArgsConstructor;

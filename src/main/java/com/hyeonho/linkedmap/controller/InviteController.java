@@ -2,26 +2,21 @@ package com.hyeonho.linkedmap.controller;
 
 import com.hyeonho.linkedmap.config.JWTProvider;
 import com.hyeonho.linkedmap.data.DefaultResponse;
-import com.hyeonho.linkedmap.data.dto.MemberInfoDTO;
-import com.hyeonho.linkedmap.data.request.CategoryJoin;
+import com.hyeonho.linkedmap.data.request.room.RoomJoinRequest;
 import com.hyeonho.linkedmap.data.request.InviteCreateReq;
-import com.hyeonho.linkedmap.data.request.RegisterRequest;
 import com.hyeonho.linkedmap.entity.*;
-import com.hyeonho.linkedmap.enumlist.CategoryUserRole;
+import com.hyeonho.linkedmap.enumlist.RoomMemberRole;
 import com.hyeonho.linkedmap.enumlist.InviteState;
 import com.hyeonho.linkedmap.error.InvalidRequestException;
-import com.hyeonho.linkedmap.repository.CategoryUserRepository;
-import com.hyeonho.linkedmap.service.CategoryService;
+import com.hyeonho.linkedmap.repository.RoomMemberRepository;
+import com.hyeonho.linkedmap.service.RoomService;
 import com.hyeonho.linkedmap.service.InviteService;
 import com.hyeonho.linkedmap.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -35,8 +30,8 @@ public class InviteController {
 
     private final JWTProvider jwtProvider;
     private final InviteService inviteService;
-    private final CategoryUserRepository categoryUserRepository;
-    private final CategoryService categoryService;
+    private final RoomMemberRepository roomMemberRepository;
+    private final RoomService roomService;
     private final MemberService memberService;
     private static final Logger log = LoggerFactory.getLogger(InviteController.class);
 
@@ -69,7 +64,7 @@ public class InviteController {
      * @return
      */
     @PostMapping("/invite/join")
-    public ResponseEntity<DefaultResponse<CategoryUser>> joinCategory(@AuthenticationPrincipal String email, @RequestBody CategoryJoin req) {
+    public ResponseEntity<DefaultResponse<RoomMember>> joinCategory(@AuthenticationPrincipal String email, @RequestBody RoomJoinRequest req) {
         if(req.getCategoryId() == null || req.getInviteKey() == null) {
             throw new InvalidRequestException("데이터 비었음");
         }
@@ -109,10 +104,10 @@ public class InviteController {
         }
 
         // categoryUser에 해당유저 추가를 위해서 유저정보와, 카테고리 정보 find
-        Category category = categoryService.findCategoryById(req.getCategoryId());
+        Room room = roomService.findRoomByRoomId(req.getCategoryId());
         Member member = memberService.findByEmail(email).orElseThrow(() -> new RuntimeException("해당 이메일의 사용자를 찾을 수 없음"));
-        CategoryUser categoryUser = new CategoryUser(category, member, InviteState.INVITE, CategoryUserRole.USER, CategoryState.ACTIVE);
-        CategoryUser response = categoryUserRepository.save(categoryUser);
+        RoomMember roomMember = new RoomMember(room, member, InviteState.INVITE, RoomMemberRole.USER, RoomState.ACTIVE);
+        RoomMember response = roomMemberRepository.save(roomMember);
         return ResponseEntity.ok(DefaultResponse.success(response));
 
 

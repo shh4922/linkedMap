@@ -53,7 +53,7 @@ public class CreateMarkerDTO {
                 .imageUrl(marker.getImageUrl())
                 .creator(marker.getMember().getEmail())
                 .createdAt(marker.getCreatedAt())
-                .categoryId(marker.getCategory().getId())
+                .categoryId(marker.getRoom().getId())
                 .build();
     }
 }

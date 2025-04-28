@@ -1,27 +1,29 @@
 package com.hyeonho.linkedmap.service;
 
-import com.hyeonho.linkedmap.entity.Category;
+import com.hyeonho.linkedmap.entity.Room;
 import com.hyeonho.linkedmap.entity.Invite;
 import com.hyeonho.linkedmap.enumlist.InviteState;
 import com.hyeonho.linkedmap.error.DatabaseException;
 import com.hyeonho.linkedmap.error.InvalidRequestException;
-import com.hyeonho.linkedmap.repository.CategoryRepository;
+import com.hyeonho.linkedmap.repository.RoomRepository;
 import com.hyeonho.linkedmap.repository.InviteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class InviteService {
 
     private final InviteRepository inviteRepository;
-    private final CategoryRepository categoryRepository;
+    private final RoomRepository roomRepository;
     public Invite createInvite(String email, Long categoryId) {
         try {
-            Category category = categoryRepository.findByIdAndDeletedAtIsNull(categoryId);
-            if(!category.getOwner().getEmail().equals(email)) {
+            Room room = roomRepository.findByIdAndDeletedAtIsNull(categoryId);
+            if(!room.getOwner().getEmail().equals(email)) {
                 throw new InvalidRequestException("권한이 없습니다");
             }
             Invite invite = new Invite(categoryId, email);

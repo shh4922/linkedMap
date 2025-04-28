@@ -1,34 +1,20 @@
 package com.hyeonho.linkedmap.controller;
 
 import com.hyeonho.linkedmap.config.JWTProvider;
-import com.hyeonho.linkedmap.config.JwtAuthFilter;
 import com.hyeonho.linkedmap.data.DefaultResponse;
-import com.hyeonho.linkedmap.data.dto.LoginResponseDTO;
-import com.hyeonho.linkedmap.data.dto.MemberDeleteDto;
-import com.hyeonho.linkedmap.data.dto.MemberInfoDTO;
-import com.hyeonho.linkedmap.data.dto.MemberUpdateDto;
+import com.hyeonho.linkedmap.data.dto.member.*;
 import com.hyeonho.linkedmap.data.request.LoginRequestDTO;
 import com.hyeonho.linkedmap.data.request.MemberUpdateRequest;
 import com.hyeonho.linkedmap.data.request.RegisterRequest;
-import com.hyeonho.linkedmap.entity.Category;
 import com.hyeonho.linkedmap.entity.Member;
-import com.hyeonho.linkedmap.error.DatabaseException;
-import com.hyeonho.linkedmap.error.DuplicateMemberException;
 import com.hyeonho.linkedmap.error.InvalidRequestException;
 import com.hyeonho.linkedmap.service.MemberService;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -42,12 +28,12 @@ public class MemberController {
 
     /** 회원가입 */
     @PostMapping("/register")
-    public ResponseEntity<DefaultResponse<Member>> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<DefaultResponse<RegisterDTO>> register(@RequestBody RegisterRequest request) {
         if(request.getEmail() == null || request.getUsername() == null || request.getPassword() == null) {
             return ResponseEntity.badRequest().body(DefaultResponse.error(400, "정보를 모두 입력하세요"));
         }
-        Member member = memberService.register(request);
-        return ResponseEntity.ok(DefaultResponse.success(member));
+
+        return ResponseEntity.ok(DefaultResponse.success(memberService.register(request)));
     }
 
     /**
@@ -79,7 +65,7 @@ public class MemberController {
         MemberInfoDTO res = new MemberInfoDTO();
         res.setEmail(member.getEmail());
         res.setUsername(member.getUsername());
-        res.setRole(member.getRole());
+        res.setRole(member.getRole().name());
         return ResponseEntity.ok(DefaultResponse.success(res));
     }
 
@@ -94,11 +80,10 @@ public class MemberController {
         Member member = memberService.findByEmail(email)
                 .orElseThrow(() -> new InvalidRequestException("해당 유저를 찾을 수 없음"));
 
-
         MemberInfoDTO res = new MemberInfoDTO();
         res.setEmail(member.getEmail());
         res.setUsername(member.getUsername());
-        res.setRole(member.getRole());
+        res.setRole(member.getRole().name());
         return ResponseEntity.ok(DefaultResponse.success(res));
     }
 

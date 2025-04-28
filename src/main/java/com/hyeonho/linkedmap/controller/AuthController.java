@@ -13,8 +13,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class AuthController {
-//    https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=99cb94f9615fab01a4413fd64a901e34&redirect_uri=http://localhost:8080/api/v1/kakao/auth
-private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     @GetMapping("/kakao/auth")
     public Map<String, String > getKakaoAuth(@RequestParam("code") String code) {
         log.info("code :{}",code);
@@ -22,5 +22,9 @@ private final Logger log = LoggerFactory.getLogger(getClass());
         return req;
     }
 
+//    @GetMapping("/auth/refresh")
+//    public Map<String, String > getAuthRefresh(@RequestParam("refresh_token") String refreshToken) {
+//
+//    }
 
 }

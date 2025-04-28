@@ -1,7 +1,6 @@
 package com.hyeonho.linkedmap.repository;
 
 import com.hyeonho.linkedmap.entity.Marker;
-import com.hyeonho.linkedmap.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,4 +15,6 @@ public interface MarkerRepository extends JpaRepository<Marker, Long> {
     List<Marker> getMarkerList(@Param("categoryId") Long categoryId);
 
     Optional<Marker> findByIdAndDeletedAtIsNull(Long id);
+
+    Long countByRoomId(Long roomId);
 }

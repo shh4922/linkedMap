@@ -50,7 +50,7 @@ public class Marker {
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private Category category;
+    private Room room;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -62,7 +62,7 @@ public class Marker {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Marker(CreateMarkerRequest request, Member member, Category category) {
+    public Marker(CreateMarkerRequest request, Member member, Room room) {
         this.lat = request.getLat();
         this.lng = request.getLng();
         this.title = request.getTitle();
@@ -72,7 +72,7 @@ public class Marker {
         this.roadAddress = request.getRoadAddress();
         this.imageUrl = request.getImageUrl();
         this.member = member;
-        this.category = category;
+        this.room = room;
     }
 
 
