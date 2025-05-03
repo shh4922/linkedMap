@@ -8,7 +8,6 @@ import com.hyeonho.linkedmap.data.request.room.RoomUpdateRequest;
 import com.hyeonho.linkedmap.data.request.room.CreateRoomRequest;
 import com.hyeonho.linkedmap.data.request.room.DeleteRoomRequest;
 import com.hyeonho.linkedmap.entity.Room;
-import com.hyeonho.linkedmap.entity.RoomState;
 import com.hyeonho.linkedmap.entity.RoomMember;
 import com.hyeonho.linkedmap.enumlist.InviteState;
 import com.hyeonho.linkedmap.error.InvalidRequestException;
@@ -32,7 +31,7 @@ public class RoomController {
     private final RoomMemberRepository roomMemberRepository;
 
 
-    /** 카테고리 생성 */
+    /** 방 생성 */
     @PostMapping("/room/create")
     public ResponseEntity<DefaultResponse<String>> createRoom(@AuthenticationPrincipal String email, @RequestBody CreateRoomRequest request) {
         if(request.getRoomName().isEmpty()) {
@@ -55,25 +54,9 @@ public class RoomController {
      */
     @GetMapping("/room/me")
     public ResponseEntity<DefaultResponse<List<RoomListDTO>>> getMyRooms(@AuthenticationPrincipal String email) {
-
-        List<RoomMember> roomMemberList = getIncludeRoomMemberListByEmail(email);
-
-        List<RoomListDTO>  response = roomMemberList.stream()
-                .map(roomMember -> {
-                    RoomListDTO dto = RoomListDTO.fromEntity(roomMember);
-
-                    Long roomId = roomMember.getRoom().getId();
-
-                    Long markerCount = markerService.getMarkerCountByRoomId(roomId);
-                    dto.setMarkerCount(markerCount.intValue());
-
-                    Long memberCount = roomService.getCountMemberByRoomId(roomId);
-                    dto.setMemberCount(memberCount.intValue());
-                    return dto;
-                })
-                .toList();
-        return ResponseEntity.ok(DefaultResponse.success(response));
+        return ResponseEntity.ok(DefaultResponse.success(roomService.getMyRooms(email)));
     }
+
 
 
     /**
@@ -83,23 +66,25 @@ public class RoomController {
      * RoomState = Active (활성화된 방만 보이게)
      */
     @GetMapping("/room/include/{email}")
-    public ResponseEntity<DefaultResponse<List<RoomMember>>> getIncludeRooms(@PathVariable(value = "email") String email) {
+    public ResponseEntity<DefaultResponse<List<RoomListDTO>>> getRoomListByEmail(@PathVariable(value = "email") String email) {
         if(email.isEmpty()) { throw new InvalidRequestException("이메일이 없음"); }
 
-        List<RoomMember> categoryList = getIncludeRoomMemberListByEmail(email)
-                .stream()
-                .filter(roomMember -> roomMember.getRoom().getRoomState() == RoomState.ACTIVE)
-                .toList();
 
-        return ResponseEntity.ok(DefaultResponse.success(categoryList));
+        return ResponseEntity.ok(DefaultResponse.success(roomService.getRoomListByEmail(email)));
     }
 
 
+    /**
+     * 특정 방의 디테일 정보
+     * 방 정보, 유저리스트 등등...
+     * @param roomId
+     * @return
+     */
     @GetMapping("/room/detail/{roomId}")
-    public ResponseEntity<DefaultResponse<RoomDetailDTO>> getRoomDetail(@AuthenticationPrincipal String email, @PathVariable("roomId") Long roomId) {
+    public ResponseEntity<DefaultResponse<RoomDetailDTO>> getRoomDetail(@PathVariable("roomId") Long roomId) {
         if(roomId == null) { throw new InvalidRequestException("해당 방의 정보가 없습니다"); }
 
-        return ResponseEntity.ok(DefaultResponse.success(roomService.getRoomDetail(email, roomId)));
+        return ResponseEntity.ok(DefaultResponse.success(roomService.getRoomDetail(roomId)));
     }
 
 
@@ -113,7 +98,7 @@ public class RoomController {
     @DeleteMapping("/room")
     public ResponseEntity<DefaultResponse<String>> deleteRoom(@AuthenticationPrincipal String email, @RequestBody DeleteRoomRequest req) {
         if(req.getRoomId() == null) { throw new InvalidRequestException("방 아이디값 없음"); }
-        Room room = roomService.deleteRoom(email, req.getRoomId());
+        Room room = roomService.deleteMyRoom(email, req.getRoomId());
         if(room.getDeletedAt() == null) {
             return ResponseEntity.ok(DefaultResponse.error(400,"삭제실패"));
         }
@@ -124,10 +109,10 @@ public class RoomController {
      * 방 나가기.
      */
     @PostMapping("/room/getout/{roomId}")
-    public ResponseEntity<DefaultResponse<String>> getOutRoom(@AuthenticationPrincipal String email, @PathVariable("roomId") Long roomId) {
+    public ResponseEntity<DefaultResponse<String>> getOutRoom(@AuthenticationPrincipal Long id, @PathVariable("roomId") Long roomId) {
         if(roomId == null) { throw new InvalidRequestException("방 아이디값 없음");}
 
-        int result = roomService.getOutRoom(email,roomId);
+        int result = roomService.getOutRoom(id,roomId);
         if(result == 0) {
             return ResponseEntity.ok(DefaultResponse.error(400,"실패"));
         }
@@ -140,10 +125,11 @@ public class RoomController {
      * @param req
      * @return
      */
-    @PutMapping("/category/update")
+    @PutMapping("/room/update")
     public ResponseEntity<DefaultResponse<Room>> updateCategory(@AuthenticationPrincipal String email, @RequestBody RoomUpdateRequest req) {
         return ResponseEntity.ok(DefaultResponse.success(roomService.updateRoom(email,req)));
     }
+
 
 
     /**

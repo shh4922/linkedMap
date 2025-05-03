@@ -1,6 +1,7 @@
 package com.hyeonho.linkedmap.entity;
 
 
+import com.hyeonho.linkedmap.data.request.MemberUpdateRequest;
 import com.hyeonho.linkedmap.enumlist.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,6 +16,9 @@ import java.util.List;
 public class Member {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
@@ -23,6 +27,9 @@ public class Member {
 
     @Column(nullable = false, length = 50)
     private String username;
+
+    @Column(nullable = true, length = 200)
+    private String profileImage;
 
 
     @Column(name = "created_at", updatable = false)
@@ -39,12 +46,14 @@ public class Member {
     private Role role;
 
     @Builder
-    public Member(String email, String password, String username, Role role) {
+    public Member(String email, String password, String username, String profileImage, Role role) {
         this.email = email;
         this.password = password;
         this.username = username;
+        this.profileImage = profileImage;
         this.role = role != null ? role : Role.ROLE_USER;
     }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -57,9 +66,12 @@ public class Member {
     }
 
 
-    public void update(String username) {
-        if(username != null) {
-            this.username = username;
+    public void update(MemberUpdateRequest request) {
+        if(request.getUsername()!= null) {
+            this.username = request.getUsername();
+        }
+        if(request.getProfileImage() != null) {
+            this.profileImage = request.getProfileImage();
         }
     }
 

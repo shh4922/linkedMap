@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class RegisterDTO {
     private String email;
     private String username;
+    private String profileImage;
     private LocalDateTime createdAt;
 
     @Builder
@@ -17,5 +18,6 @@ public class RegisterDTO {
         this.email = member.getEmail();
         this.username = member.getUsername();
         this.createdAt = member.getCreatedAt();
+        this.profileImage = member.getProfileImage();
     }
 }

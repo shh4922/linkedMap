@@ -12,17 +12,23 @@ import lombok.Setter;
  * 그런데, Builder 를 사용하면 Jackson의 기본 생성자를 사용할수가 없음.
  */
 @Getter
-@Setter
 @NoArgsConstructor
 public class RegisterRequest {
     private String email;
     private String password;
     private String username;
+    private String profileImage;
 
-    @Builder
-    public RegisterRequest(String email, String password, String username) {
-        this.email = email;
-        this.password = password;
-        this.username = username;
-    }
+//    @Builder
+//    public RegisterRequest(String email, String password, String username, String profileImage) {
+//        this.email = email;
+//        this.password = password;
+//        this.username = username;
+//        this.profileImage = profileImage;
+//    }
+//    public RegisterRequest(String email, String password, String username) {
+//        this.email = email;
+//        this.password = password;
+//        this.username = username;
+//    }
 }

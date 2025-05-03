@@ -1,6 +1,7 @@
 package com.hyeonho.linkedmap.config;
 
 import com.hyeonho.linkedmap.entity.Member;
+import com.hyeonho.linkedmap.error.InvalidRequestException;
 import com.hyeonho.linkedmap.service.MemberService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -51,7 +52,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 //            String jwtToken = token.substring(7);
 //            log.info("token :{}",token);
 //            log.info("token2 :{}",jwtToken);
-            username = jwtProvider.getUsernameFromToken(token);
+            username = jwtProvider.getJtiFromToken(token);
         }
 
         /**
@@ -82,7 +83,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      */
     private UsernamePasswordAuthenticationToken getUserAuth(String email) {
         Member userInfo = memberService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("해당 이메일의 사용자를 찾을 수 없음"));
+                .orElseThrow(() -> new InvalidRequestException("해당 계정 없음"));
 
         return new UsernamePasswordAuthenticationToken(userInfo.getEmail(),
                 userInfo.getPassword(),

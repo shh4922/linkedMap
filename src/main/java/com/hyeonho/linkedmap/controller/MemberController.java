@@ -58,15 +58,8 @@ public class MemberController {
      * @return 이메일, 이름, 역할 리턴
      */
     @GetMapping("/user/my")
-    public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMyInfo(@AuthenticationPrincipal String email) {
-        Member member = memberService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("해당 이메일의 사용자를 찾을 수 없음"));
-
-        MemberInfoDTO res = new MemberInfoDTO();
-        res.setEmail(member.getEmail());
-        res.setUsername(member.getUsername());
-        res.setRole(member.getRole().name());
-        return ResponseEntity.ok(DefaultResponse.success(res));
+    public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMyInfo(@AuthenticationPrincipal Long id) {
+        return ResponseEntity.ok(DefaultResponse.success(memberService.getMyInfoById(id)));
     }
 
     /**
@@ -75,16 +68,9 @@ public class MemberController {
      * @param email
      * @return 이름, 이메일, 역할 리턴함
      */
-    @GetMapping("/users/info")
-    public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMemberInfoByEmail(@RequestParam(value = "email") String email) {
-        Member member = memberService.findByEmail(email)
-                .orElseThrow(() -> new InvalidRequestException("해당 유저를 찾을 수 없음"));
-
-        MemberInfoDTO res = new MemberInfoDTO();
-        res.setEmail(member.getEmail());
-        res.setUsername(member.getUsername());
-        res.setRole(member.getRole().name());
-        return ResponseEntity.ok(DefaultResponse.success(res));
+    @GetMapping("/users/info/{email}")
+    public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMemberInfoByEmail(@PathVariable(value = "email") String email) {
+        return ResponseEntity.ok(DefaultResponse.success(memberService.getUserInfoByEmail(email)));
     }
 
     /**
@@ -94,19 +80,8 @@ public class MemberController {
      * @return
      */
     @PatchMapping("/user/info")
-    public ResponseEntity<DefaultResponse<MemberUpdateDto>> updateMemberInfo(@AuthenticationPrincipal String email, MemberUpdateRequest request) {
-        Member member = memberService.findByEmail(email)
-                .orElseThrow(() -> new InvalidRequestException("해당 유저를 찾을 수 없음"));
-
-        Member updatedMember = memberService.updateMemberInfo(member,request);
-        MemberUpdateDto memberUpdateDto = new MemberUpdateDto();
-
-        memberUpdateDto.setEmail(updatedMember.getEmail());
-        memberUpdateDto.setUsername(updatedMember.getUsername());
-        memberUpdateDto.setCreatedAt(updatedMember.getCreatedAt());
-        memberUpdateDto.setUpdateAt(updatedMember.getUpdatedAt());
-
-        return ResponseEntity.ok(DefaultResponse.success(memberUpdateDto));
+    public ResponseEntity<DefaultResponse<MemberUpdateDto>> updateMemberInfo(@AuthenticationPrincipal Long id, MemberUpdateRequest request) {
+        return ResponseEntity.ok(DefaultResponse.success(memberService.updateMemberInfo(id, request)));
     }
 
     /**
@@ -116,16 +91,12 @@ public class MemberController {
      * 내가 속한 카테고리는 나가기 처리 해야함.
      */
     @DeleteMapping("/user/delete")
-    public ResponseEntity<DefaultResponse<MemberDeleteDto>> deleteMember(@AuthenticationPrincipal String email) {
-        Member member = memberService.deleteMember(email);
+    public ResponseEntity<DefaultResponse<String>> deleteMember(@AuthenticationPrincipal Long memberId) {
+
+        Member member = memberService.deleteMember(memberId);
 
         if(member.getDeletedAt() != null) {
-            MemberDeleteDto deleteDto = MemberDeleteDto.builder()
-                    .username(member.getUsername())
-                    .email(member.getEmail())
-                    .deletedAt(member.getDeletedAt())
-                    .build();
-            return ResponseEntity.ok(DefaultResponse.success(deleteDto));
+            return ResponseEntity.ok(DefaultResponse.success("0"));
         }
 
         return ResponseEntity.badRequest()

@@ -9,7 +9,7 @@ import java.util.Optional;
 @NoArgsConstructor
 public class RefreshToken {
 
-    protected static final Map<String, String> refreshTokens = new HashMap<>();
+    protected static final Map<String, Long> refreshTokens = new HashMap<>();
 
     /**
      * refresh token get
@@ -17,7 +17,7 @@ public class RefreshToken {
      * @param refreshToken refresh token
      * @return id
      */
-    public static String getRefreshToken(final String refreshToken) {
+    public static Long getUserIdByRefreshToken(final String refreshToken) {
         return Optional.ofNullable(refreshTokens.get(refreshToken))
                 .orElseThrow(() -> new RuntimeException("Refresh token does not exist."));
     }
@@ -26,10 +26,9 @@ public class RefreshToken {
      * refresh token put
      *
      * @param refreshToken refresh token
-     * @param email email
      */
-    public static void putRefreshToken(final String refreshToken, String email) {
-        refreshTokens.put(refreshToken, email);
+    public static void putRefreshToken(final String refreshToken, Long id) {
+        refreshTokens.put(refreshToken, id);
     }
 
     /**
@@ -42,7 +41,11 @@ public class RefreshToken {
     }
 
     // user refresh token remove
-    public static void removeUserRefreshToken(final String email) {
-        refreshTokens.entrySet().removeIf(entry -> entry.getValue(). equals(email));
+//    public static void removeUserRefreshToken(final String email) {
+//        refreshTokens.entrySet().removeIf(entry -> entry.getValue(). equals(email));
+//    }
+
+    public static void removeUserRefreshToken(final Long id) {
+        refreshTokens.entrySet().removeIf(entry -> entry.getValue(). equals(id));
     }
 }

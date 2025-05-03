@@ -39,10 +39,21 @@ public class JWTProvider {
     /**
      * Claims.getId() 는 Claims 중 jti라는 애를 가져와서 리턴함
      * jti는 JWT의 고유 식별자임. 중복제거를 위한 고유값인데, 블랙리스트, 중복로그인 방지를 위해 쓰임.
+     * JTI -> JSON WEB Token ID 줄임말
+     * jwt는 header, payload, signature로 구성되어있음.
+     * header는 jwt의 메타정보, payload는 jwt의 데이터, signature는 jwt의 서명임.
+     * JTI는 payload에 들어있는 정보중 하나임(Clams에 들어있음)
+     * claims는 jwt에 저장되는 데이터를 말함.
      */
-    public String getUsernameFromToken(final String token) {
+    public String getJtiFromToken(final String token) {
         return getClaimFromToken(token, Claims::getId);
     }
+
+//    public Long getUserIdFromToken(final String token) {
+//        return getClaimFromToken(token, Claims::getId);
+//    }
+
+
 
     /**
      * token 사용자 속성 정보 조회
@@ -199,7 +210,7 @@ public class JWTProvider {
 
     public String getEmailFromHeaders(HttpHeaders headers) {
         String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
-        return getUsernameFromToken(authorization);
+        return getJtiFromToken(authorization);
     }
 
 }

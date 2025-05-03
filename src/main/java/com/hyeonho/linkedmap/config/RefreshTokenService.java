@@ -16,7 +16,7 @@ public class RefreshTokenService{
         checkRefreshToken(refreshToken);
 
         // refresh token id 조회
-        var id = RefreshToken.getRefreshToken(refreshToken);
+        var id = RefreshToken.getUserIdByRefreshToken(refreshToken);
 
         // 새로운 access token 생성
         String newAccessToken = jwtProvider.generateAccessToken(id);

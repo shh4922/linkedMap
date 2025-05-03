@@ -74,6 +74,9 @@ public class Room {
         if(req.getImageUrl() != null) {
             this.imageUrl = req.getImageUrl();
         }
+        if(req.getDescription() != null) {
+            this.description = req.getDescription();
+        }
     }
 
     public void delete() {

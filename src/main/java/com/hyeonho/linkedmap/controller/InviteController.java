@@ -105,7 +105,8 @@ public class InviteController {
 
         // categoryUser에 해당유저 추가를 위해서 유저정보와, 카테고리 정보 find
         Room room = roomService.findRoomByRoomId(req.getCategoryId());
-        Member member = memberService.findByEmail(email).orElseThrow(() -> new RuntimeException("해당 이메일의 사용자를 찾을 수 없음"));
+        Member member = memberService.findByEmail(email)
+                .orElseThrow(() -> new InvalidRequestException("해당 유저 없음"));
         RoomMember roomMember = new RoomMember(room, member, InviteState.INVITE, RoomMemberRole.USER, RoomState.ACTIVE);
         RoomMember response = roomMemberRepository.save(roomMember);
         return ResponseEntity.ok(DefaultResponse.success(response));

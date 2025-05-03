@@ -8,5 +8,6 @@ import lombok.Setter;
 public class RoomUpdateRequest {
     Long roomId;
     String roomName;
+    String description;
     String imageUrl;
 }

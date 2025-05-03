@@ -33,8 +33,8 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
 
      /** 유저의 초대상태를 변경 */
     @Modifying
-    @Query("UPDATE RoomMember rm SET rm.inviteState = :inviteState WHERE rm.room.id = :roomId AND rm.member.email = :email")
-    int updateInviteStatusToDelete(@Param("inviteState") InviteState inviteState, @Param("roomId") Long roomId, @Param("email") String email);
+    @Query("UPDATE RoomMember rm SET rm.inviteState = :inviteState WHERE rm.room.id = :roomId AND rm.member.id = :memberId")
+    int updateInviteStatusToDelete(@Param("inviteState") InviteState inviteState, @Param("roomId") Long roomId, @Param("memberId") Long memberId);
 
 
     /**  */

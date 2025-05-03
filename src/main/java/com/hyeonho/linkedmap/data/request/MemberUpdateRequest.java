@@ -5,4 +5,5 @@ import lombok.Getter;
 @Getter
 public class MemberUpdateRequest {
     private String username;
+    private String profileImage;
 }

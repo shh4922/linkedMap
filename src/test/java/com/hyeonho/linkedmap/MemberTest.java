@@ -39,10 +39,10 @@ public class MemberTest {
 
     @Test
     void createMember() {
-        RegisterRequest request = RegisterRequest.builder()
-                .email("test999")
-                .password("test999")
-                .username("test999").build();
+//        RegisterRequest request = RegisterRequest.builder()
+//                .email("test999")
+//                .password("test999")
+//                .username("test999").build();
 
 //        log.info("request {}", request.getEmail());
 //        log.info("request {}", request.getUsername());
