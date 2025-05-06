@@ -143,7 +143,7 @@ public class MemberService {
         member.delete();
 
         /** 내가 속한 카테고리 조회*/
-        List<RoomMember> includeRoomList = roomService.getIncludeRoomsByEmail(member.getEmail(), InviteState.INVITE);
+        List<RoomMember> includeRoomList = roomService.getIncludeRoomsByMemberId(member.getEmail(), InviteState.INVITE);
 
         /**
          * 일단 내가속한 방들의 inviteState를 GETOUT으로 모두 변경

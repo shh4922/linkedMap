@@ -42,8 +42,8 @@ public class RoomMember {
 //    @Column(name = "category_state")
 //    private CategoryState categoryState;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "invite_at", updatable = false)
+    private LocalDateTime inviteAt;
 
     @Column(name = "update_at")
     private LocalDateTime updatedAt;
@@ -61,7 +61,7 @@ public class RoomMember {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.inviteAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
     @PreUpdate

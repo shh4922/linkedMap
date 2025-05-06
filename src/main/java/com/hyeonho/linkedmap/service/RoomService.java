@@ -29,9 +29,9 @@ import java.util.List;
 public class RoomService {
 
     private final RoomRepository roomRepository;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final RoomMemberRepository roomMemberRepository;
-    private final MarkerRepository markerRepository;
+    private final MarkerService markerService;
 
     /**
      * 방 생성
@@ -39,15 +39,14 @@ public class RoomService {
      * @param request
      * @return
      */
-    public Room createRoom(String email, CreateRoomRequest request) {
+    public Room createRoom(Long id, CreateRoomRequest request) {
         try {
-            Member member = memberRepository.findById(email)
-                    .orElseThrow(() -> new RuntimeException("해당 계정 없음"));
+            Member member = memberService.findMemberById(id);
 
             Room room = new Room(member, request);
             saveRoom(room);
 
-            // 카테고리 생성후, 카테고리유저 테이블에 추가
+            // 방 생성후 RoomMember에 해당 유저 추가
             RoomMember roomMember = new RoomMember(room, member, InviteState.INVITE, RoomMemberRole.OWNER);
             roomMemberRepository.save(roomMember);
             return room;
@@ -59,14 +58,15 @@ public class RoomService {
 
     /** 내가 속한 방 조회 */
     public List<RoomListDTO> getMyRooms(String email) {
-        List<RoomMember> roomMemberList = getIncludeRoomsByEmail(email, InviteState.INVITE);
+        List<RoomMember> roomMemberList = getIncludeRoomsByMemberId(email, InviteState.INVITE);
         return roomMemberList.stream()
                 .map(roomMember -> {
                     RoomListDTO dto = RoomListDTO.fromEntityMyRoom(roomMember);
 
                     Long roomId = roomMember.getRoom().getId();
 
-                    Long markerCount = markerRepository.countByRoomId(roomId);
+                    Long markerCount = markerService.getMarkerCountByRoomId(roomId);
+
                     dto.setMarkerCount(markerCount.intValue());
 
                     Long memberCount = this.getCountMemberByRoomId(roomId);
@@ -78,8 +78,8 @@ public class RoomService {
     }
 
     /** 특정 유저가 속한 방 리스트 조회*/
-    public List<RoomListDTO> getRoomListByEmail(String email) {
-        List<RoomMember> roomMemberList = getIncludeRoomsByEmail(email, InviteState.INVITE);
+    public List<RoomListDTO> getRoomListById(Long memberId) {
+        List<RoomMember> roomMemberList = getIncludeRoomsByMemberId(email, InviteState.INVITE);
         return roomMemberList.stream()
                 .filter(roomMember -> roomMember.getRoom().getRoomState() == RoomState.ACTIVE)
                 .map(roomMember -> {
@@ -211,8 +211,8 @@ public class RoomService {
     }
 
 
-    public List<RoomMember> getIncludeRoomsByEmail(String email, InviteState inviteState) {
-        return roomMemberRepository.getIncludeRoomByEmail(email, inviteState);
+    public List<RoomMember> getIncludeRoomsByMemberId(Long memberId, InviteState inviteState) {
+        return roomMemberRepository.getIncludeRoomByMemberId(memberId, inviteState);
     }
 
     public Long getCountMemberByRoomId(Long roomId) {

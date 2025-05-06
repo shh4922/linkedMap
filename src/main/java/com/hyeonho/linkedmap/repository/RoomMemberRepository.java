@@ -17,8 +17,8 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
 
 
     /** 특정 유저가 속한 카테고리 리스트 조회. */
-    @Query("SELECT rm FROM RoomMember rm WHERE rm.member.email = :email AND rm.inviteState = :inviteState")
-    List<RoomMember> getIncludeRoomByEmail(@Param(value = "email") String email, @Param(value = "inviteState") InviteState inviteState);
+    @Query("SELECT rm FROM RoomMember rm WHERE rm.member.id = :memberId AND rm.inviteState = :inviteState")
+    List<RoomMember> getIncludeRoomByMemberId(@Param(value = "memberId") Long memberId, @Param(value = "inviteState") InviteState inviteState);
 
     /** 특정 카테고리 속한 카테고리유저 리스트 조회. */
     @Query("SELECT rm FROM RoomMember rm WHERE rm.room.id = :categoryId AND rm.inviteState = :inviteState")

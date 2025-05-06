@@ -33,12 +33,12 @@ public class RoomController {
 
     /** 방 생성 */
     @PostMapping("/room/create")
-    public ResponseEntity<DefaultResponse<String>> createRoom(@AuthenticationPrincipal String email, @RequestBody CreateRoomRequest request) {
+    public ResponseEntity<DefaultResponse<String>> createRoom(@AuthenticationPrincipal Long memberId, @RequestBody CreateRoomRequest request) {
         if(request.getRoomName().isEmpty()) {
             throw new InvalidRequestException("필수항목이 비어있습니다.");
         }
 
-        Room room = roomService.createRoom(email,request);
+        Room room = roomService.createRoom(memberId,request);
         if(room == null) {
             return ResponseEntity.ok(DefaultResponse.success(""));
         }
@@ -65,12 +65,12 @@ public class RoomController {
      * InviteState = invite (초대된것만 보이게)
      * RoomState = Active (활성화된 방만 보이게)
      */
-    @GetMapping("/room/include/{email}")
-    public ResponseEntity<DefaultResponse<List<RoomListDTO>>> getRoomListByEmail(@PathVariable(value = "email") String email) {
-        if(email.isEmpty()) { throw new InvalidRequestException("이메일이 없음"); }
+    @GetMapping("/room/include/{memberId}")
+    public ResponseEntity<DefaultResponse<List<RoomListDTO>>> getRoomListById(@PathVariable(value = "memberId") Long memberId) {
+        if(memberId == null) { throw new InvalidRequestException("회원정보가 없습니다."); }
 
 
-        return ResponseEntity.ok(DefaultResponse.success(roomService.getRoomListByEmail(email)));
+        return ResponseEntity.ok(DefaultResponse.success(roomService.getRoomListById(memberId)));
     }
 
 
@@ -138,6 +138,6 @@ public class RoomController {
      * @return
      */
     private List<RoomMember> getIncludeRoomMemberListByEmail(String email) {
-        return roomService.getIncludeRoomsByEmail(email, InviteState.INVITE);
+        return roomService.getIncludeRoomsByMemberId(email, InviteState.INVITE);
     }
 }
