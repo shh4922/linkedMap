@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class MemberInfoDTO {
+    private Long memberId;
     private String email;
     private String username;
     private String role;
@@ -18,7 +19,8 @@ public class MemberInfoDTO {
     private LocalDateTime createdAt;
 
     @Builder
-    public MemberInfoDTO(String email, String username, String role, String profileImage, LocalDateTime createdAt) {
+    public MemberInfoDTO(Long memberId, String email, String username, String role, String profileImage, LocalDateTime createdAt) {
+        this.memberId = memberId;
         this.email = email;
         this.username = username;
         this.role = role;

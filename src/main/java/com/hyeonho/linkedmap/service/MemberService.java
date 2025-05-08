@@ -64,6 +64,7 @@ public class MemberService {
         Member member = findMemberById(id);
 
         return MemberInfoDTO.builder()
+                .memberId(member.getId())
                 .email(member.getEmail())
                 .username(member.getUsername())
                 .role(member.getRole().name())
@@ -78,6 +79,7 @@ public class MemberService {
                 .orElseThrow(() -> new InvalidRequestException("해당 계정 없음"));
 
         return MemberInfoDTO.builder()
+                .memberId(member.getId())
                 .email(member.getEmail())
                 .username(member.getUsername())
                 .profileImage(member.getProfileImage())
@@ -126,6 +128,7 @@ public class MemberService {
         member.update(request);
 
         return MemberUpdateDto.builder()
+                .memberId(member.getId())
                 .email(member.getEmail())
                 .username(member.getUsername())
                 .profileImage(member.getProfileImage())
@@ -143,7 +146,7 @@ public class MemberService {
         member.delete();
 
         /** 내가 속한 카테고리 조회*/
-        List<RoomMember> includeRoomList = roomService.getIncludeRoomsByMemberId(member.getEmail(), InviteState.INVITE);
+        List<RoomMember> includeRoomList = roomService.getIncludeRoomsByMemberId(member.getId(), InviteState.INVITE);
 
         /**
          * 일단 내가속한 방들의 inviteState를 GETOUT으로 모두 변경

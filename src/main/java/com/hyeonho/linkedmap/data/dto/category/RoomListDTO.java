@@ -20,6 +20,8 @@ public class RoomListDTO {
     private Long roomId;
     private String roomName;
     private String roomDescription;
+
+    private Long currentOwnerId;
     private String currentOwnerEmail;
     private String currentOwnerName;
     private String createUserEmail;
@@ -36,7 +38,7 @@ public class RoomListDTO {
     private Integer memberCount;    // 초대된 유저 수
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime createAt;   // 방 생성일
+    private LocalDateTime roomCreateAt;   // 방 생성일
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime inviteDate;   // 초대된 날짜
@@ -48,12 +50,13 @@ public class RoomListDTO {
             Long roomId,
             String roomName,
             String roomDescription,
+            Long currentOwnerId,
             String currentOwnerName,
             String currentOwnerEmail,
             String createUserEmail,
             String createUserName,
             String inviteState,
-            LocalDateTime createAt,
+            LocalDateTime roomCreateAt,
             LocalDateTime inviteDate,
             String role,
             String roomState)
@@ -62,12 +65,13 @@ public class RoomListDTO {
         this.roomId = roomId;
         this.roomName = roomName;
         this.roomDescription = roomDescription;
+        this.currentOwnerId = currentOwnerId;
         this.currentOwnerEmail = currentOwnerEmail;
         this.currentOwnerName = currentOwnerName;
         this.createUserEmail = createUserEmail;
         this.createUserName = createUserName;
         this.role = role;
-        this.createAt = createAt;
+        this.roomCreateAt = roomCreateAt;
         this.inviteState = inviteState;
 
         this.roomState = roomState;
@@ -80,16 +84,16 @@ public class RoomListDTO {
                 .roomId(roomMember.getRoom().getId())
                 .roomName(roomMember.getRoom().getName())
                 .roomDescription(roomMember.getRoom().getDescription())
+                .currentOwnerId(roomMember.getRoom().getCurrentOwner().getId())
                 .currentOwnerEmail(roomMember.getRoom().getCurrentOwner().getEmail())
                 .currentOwnerName(roomMember.getRoom().getCurrentOwner().getUsername())
-                .createUserEmail(roomMember.getRoom().getCreator().getEmail())
                 .createUserName(roomMember.getRoom().getCreator().getUsername())
+                .createUserEmail(roomMember.getRoom().getCreator().getEmail())
                 .role(roomMember.getRoomMemberRole().name())
-                .createAt(roomMember.getRoom().getCreatedAt())
+                .roomCreateAt(roomMember.getRoom().getCreatedAt())
 
                 .inviteState(roomMember.getInviteState().name())
-                .roomState(roomMember.getRoom().getRoomState().name())
-                .inviteDate(roomMember.getCreatedAt())
+                .inviteDate(roomMember.getInviteAt())
                 .build();
     }
 
@@ -102,10 +106,10 @@ public class RoomListDTO {
                 .currentOwnerName(roomMember.getRoom().getCurrentOwner().getUsername())
                 .createUserEmail(roomMember.getRoom().getCreator().getEmail())
                 .createUserName(roomMember.getRoom().getCreator().getUsername())
-                .createAt(roomMember.getRoom().getCreatedAt())
+                .roomCreateAt(roomMember.getRoom().getCreatedAt())
 
                 .role(roomMember.getRoomMemberRole().name())
-                .inviteDate(roomMember.getCreatedAt())
+                .inviteDate(roomMember.getInviteAt())
 
                 .build();
     }

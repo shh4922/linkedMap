@@ -15,12 +15,14 @@ import com.hyeonho.linkedmap.repository.RoomMemberRepository;
 import com.hyeonho.linkedmap.service.RoomService;
 import com.hyeonho.linkedmap.service.MarkerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -33,14 +35,15 @@ public class RoomController {
 
     /** 방 생성 */
     @PostMapping("/room/create")
-    public ResponseEntity<DefaultResponse<String>> createRoom(@AuthenticationPrincipal Long memberId, @RequestBody CreateRoomRequest request) {
+    public ResponseEntity<DefaultResponse<String>> createRoom(@AuthenticationPrincipal Long id, @RequestBody CreateRoomRequest request) {
+        log.info("Creating room with id {}", id);
         if(request.getRoomName().isEmpty()) {
-            throw new InvalidRequestException("필수항목이 비어있습니다.");
+            return ResponseEntity.ok(DefaultResponse.error(400,"필수항목이 비어있습니다."));
         }
 
-        Room room = roomService.createRoom(memberId,request);
-        if(room == null) {
-            return ResponseEntity.ok(DefaultResponse.success(""));
+        Room room = roomService.createRoom(id,request);
+        if(room != null) {
+            return ResponseEntity.ok(DefaultResponse.success("1"));
         }
 
         return ResponseEntity.badRequest()
@@ -53,8 +56,8 @@ public class RoomController {
      * 하지만 roomState 가 delete 면 화면에서 삭제된방 이라고 보여줘야함.
      */
     @GetMapping("/room/me")
-    public ResponseEntity<DefaultResponse<List<RoomListDTO>>> getMyRooms(@AuthenticationPrincipal String email) {
-        return ResponseEntity.ok(DefaultResponse.success(roomService.getMyRooms(email)));
+    public ResponseEntity<DefaultResponse<List<RoomListDTO>>> getMyRooms(@AuthenticationPrincipal Long memberId) {
+        return ResponseEntity.ok(DefaultResponse.success(roomService.getMyRooms(memberId)));
     }
 
 
@@ -96,9 +99,9 @@ public class RoomController {
      * @return
      */
     @DeleteMapping("/room")
-    public ResponseEntity<DefaultResponse<String>> deleteRoom(@AuthenticationPrincipal String email, @RequestBody DeleteRoomRequest req) {
+    public ResponseEntity<DefaultResponse<String>> deleteRoom(@AuthenticationPrincipal Long memberId, @RequestBody DeleteRoomRequest req) {
         if(req.getRoomId() == null) { throw new InvalidRequestException("방 아이디값 없음"); }
-        Room room = roomService.deleteMyRoom(email, req.getRoomId());
+        Room room = roomService.deleteMyRoom(memberId, req.getRoomId(), null);
         if(room.getDeletedAt() == null) {
             return ResponseEntity.ok(DefaultResponse.error(400,"삭제실패"));
         }
@@ -109,10 +112,10 @@ public class RoomController {
      * 방 나가기.
      */
     @PostMapping("/room/getout/{roomId}")
-    public ResponseEntity<DefaultResponse<String>> getOutRoom(@AuthenticationPrincipal Long id, @PathVariable("roomId") Long roomId) {
+    public ResponseEntity<DefaultResponse<String>> getOutRoom(@AuthenticationPrincipal Long memberId, @PathVariable("roomId") Long roomId) {
         if(roomId == null) { throw new InvalidRequestException("방 아이디값 없음");}
 
-        int result = roomService.getOutRoom(id,roomId);
+        int result = roomService.getOutRoom(memberId,roomId);
         if(result == 0) {
             return ResponseEntity.ok(DefaultResponse.error(400,"실패"));
         }
@@ -134,10 +137,10 @@ public class RoomController {
 
     /**
      * 특정 유저가 속한 RoomMember 리스트를 리턴합니다
-     * @param email
+     *
      * @return
      */
-    private List<RoomMember> getIncludeRoomMemberListByEmail(String email) {
-        return roomService.getIncludeRoomsByMemberId(email, InviteState.INVITE);
+    private List<RoomMember> getIncludeRoomMemberListByEmail(Long memberId) {
+        return roomService.getIncludeRoomsByMemberId(memberId, InviteState.INVITE);
     }
 }

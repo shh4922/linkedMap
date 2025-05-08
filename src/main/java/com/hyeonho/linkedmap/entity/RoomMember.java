@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // 외부에서 기본 생성자 호출 불가
-@Table(name = "category_user")
 public class RoomMember {
 
     @Id

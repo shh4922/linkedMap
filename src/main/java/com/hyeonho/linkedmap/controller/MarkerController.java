@@ -28,26 +28,26 @@ public class MarkerController {
      * @return
      */
     @PostMapping("/marker/create")
-    public ResponseEntity<DefaultResponse<CreateMarkerDTO>> createMarker(@AuthenticationPrincipal String email, @RequestBody CreateMarkerRequest req) {
-        CreateMarkerDTO markerDTO = markerService.createMarker(req,email);
+    public ResponseEntity<DefaultResponse<CreateMarkerDTO>> createMarker(@AuthenticationPrincipal Long memberId, @RequestBody CreateMarkerRequest req) {
+        CreateMarkerDTO markerDTO = markerService.createMarker(req,memberId);
         return ResponseEntity.ok(DefaultResponse.success(markerDTO));
     }
 
     @GetMapping("/markers/{categoryId}")
-    public ResponseEntity<DefaultResponse<List<CreateMarkerDTO>>> getMarkerListByCategoryId(@AuthenticationPrincipal String email, @PathVariable(value = "categoryId") Long categoryId) {
-        List<CreateMarkerDTO> markerDTOS = markerService.getMarkerListByCategoryId(email, categoryId);
+    public ResponseEntity<DefaultResponse<List<CreateMarkerDTO>>> getMarkerListByCategoryId(@AuthenticationPrincipal Long memberId, @PathVariable(value = "roomId") Long roomId) {
+        List<CreateMarkerDTO> markerDTOS = markerService.getMarkerListByRoomId(memberId, roomId);
         return ResponseEntity.ok(DefaultResponse.success(markerDTOS));
     }
 
     @PutMapping("/marker/update")
-    public ResponseEntity<DefaultResponse<CreateMarkerDTO>> updateMarker(@AuthenticationPrincipal String email, @RequestBody UpdateMarkerRequest req) {
-        CreateMarkerDTO markerDTO = markerService.updateMarker(email, req);
+    public ResponseEntity<DefaultResponse<CreateMarkerDTO>> updateMarker(@AuthenticationPrincipal Long memberId, @RequestBody UpdateMarkerRequest req) {
+        CreateMarkerDTO markerDTO = markerService.updateMarker(memberId, req);
         return ResponseEntity.ok(DefaultResponse.success(markerDTO));
     }
 
     @DeleteMapping("/marker/{markerId}")
-    public ResponseEntity<DefaultResponse<Marker>> deleteMarker(@AuthenticationPrincipal String email, @PathVariable(value = "markerId") Long markerId) {
-        Marker marker = markerService.deleteMarker(email,markerId);
+    public ResponseEntity<DefaultResponse<Marker>> deleteMarker(@AuthenticationPrincipal Long memberId, @PathVariable(value = "markerId") Long markerId) {
+        Marker marker = markerService.deleteMarker(memberId,markerId);
         return ResponseEntity.ok(DefaultResponse.success(marker));
     }
 }

@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface InviteRepository extends JpaRepository<Invite, Long> {
 
     /** UUID 로 초대링크 찾기*/
-    @Query("SELECT in FROM Invite in WHERE in.inviteKey = :inviteKey")
+    @Query("SELECT inv FROM Invite inv WHERE inv.inviteKey = :inviteKey")
     Invite findInviteByUUID(@Param("inviteKey")UUID inviteKey);
 
 
@@ -21,11 +21,11 @@ public interface InviteRepository extends JpaRepository<Invite, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE Invite in SET in.inviteState = :inviteState WHERE in.inviteKey = :inviteKey")
+    @Query("UPDATE Invite inv SET inv.inviteState = :inviteState WHERE inv.inviteKey = :inviteKey")
     int updateInviteStateByUUID(InviteState inviteState, UUID inviteKey);
 
     @Transactional
     @Modifying
-    @Query("UPDATE Invite in SET in.inviteState = :inviteState, in.invitedMember = :email WHERE in.inviteKey = :inviteKey")
-    int updateInviteMemberByUUID(@Param("inviteState")InviteState inviteState, @Param("email")String email, @Param("inviteKey")UUID inviteKey);
+    @Query("UPDATE Invite inv SET inv.inviteState = :inviteState, inv.invitor = :memberId WHERE inv.inviteKey = :inviteKey")
+    int updateInviteMemberByUUID(@Param("inviteState")InviteState inviteState, @Param("memberId") Long memberId, @Param("inviteKey")UUID inviteKey);
 }

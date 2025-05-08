@@ -29,7 +29,7 @@ import java.util.List;
 public class RoomService {
 
     private final RoomRepository roomRepository;
-    private final MemberService memberService;
+    private final MemberRepository memberRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final MarkerService markerService;
 
@@ -41,7 +41,9 @@ public class RoomService {
      */
     public Room createRoom(Long id, CreateRoomRequest request) {
         try {
-            Member member = memberService.findMemberById(id);
+            Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
+                    .orElseThrow(() -> new InvalidRequestException("없는 유저입니다."));
+
 
             Room room = new Room(member, request);
             saveRoom(room);
@@ -57,8 +59,8 @@ public class RoomService {
 
 
     /** 내가 속한 방 조회 */
-    public List<RoomListDTO> getMyRooms(String email) {
-        List<RoomMember> roomMemberList = getIncludeRoomsByMemberId(email, InviteState.INVITE);
+    public List<RoomListDTO> getMyRooms(Long memberId) {
+        List<RoomMember> roomMemberList = getIncludeRoomsByMemberId(memberId, InviteState.INVITE);
         return roomMemberList.stream()
                 .map(roomMember -> {
                     RoomListDTO dto = RoomListDTO.fromEntityMyRoom(roomMember);
@@ -79,7 +81,7 @@ public class RoomService {
 
     /** 특정 유저가 속한 방 리스트 조회*/
     public List<RoomListDTO> getRoomListById(Long memberId) {
-        List<RoomMember> roomMemberList = getIncludeRoomsByMemberId(email, InviteState.INVITE);
+        List<RoomMember> roomMemberList = getIncludeRoomsByMemberId(memberId, InviteState.INVITE);
         return roomMemberList.stream()
                 .filter(roomMember -> roomMember.getRoom().getRoomState() == RoomState.ACTIVE)
                 .map(roomMember -> {
@@ -87,7 +89,8 @@ public class RoomService {
 
                     Long roomId = roomMember.getRoom().getId();
 
-                    Long markerCount = markerRepository.countByRoomId(roomId);
+                    Long markerCount = markerService.getMarkerCountByRoomId(roomId);
+
                     dto.setMarkerCount(markerCount.intValue());
 
                     Long memberCount = this.getCountMemberByRoomId(roomId);
@@ -108,7 +111,8 @@ public class RoomService {
      */
     public RoomDetailDTO getRoomDetail(Long roomId) {
         List<RoomMember> roomMemberList = roomMemberRepository.getIncludeCategoryByRoomId(roomId, InviteState.INVITE);
-        Long markerCount = markerRepository.countByRoomId(roomId);
+        Long markerCount = markerService.getMarkerCountByRoomId(roomId);
+
 
         List<RoomMemberDTO> roomMemberDTOList = roomMemberList.stream()
                 .map(categoryUser -> {
@@ -117,7 +121,7 @@ public class RoomService {
                             .name(member.getUsername())
                             .role(categoryUser.getRoomMemberRole().name())
                             .email(member.getEmail())
-                            .inviteDate(categoryUser.getCreatedAt())
+                            .inviteDate(categoryUser.getInviteAt())
                             .build();
                 })
                 .toList();
@@ -128,11 +132,12 @@ public class RoomService {
                 .roomId(firstRoomMember.getRoom().getId())
                 .roomName(firstRoomMember.getRoom().getName())
                 .roomDescription(firstRoomMember.getRoom().getDescription())
+                .currentRoomOwnerId(firstRoomMember.getRoom().getCurrentOwner().getId())
                 .currentRoomOwnerName(firstRoomMember.getRoom().getCurrentOwner().getUsername())
                 .currentRoomOwnerEmail(firstRoomMember.getRoom().getCurrentOwner().getEmail())
                 .createUserEmail(firstRoomMember.getRoom().getCreator().getEmail())
                 .createUserName(firstRoomMember.getRoom().getCreator().getUsername())
-                .createdAt(firstRoomMember.getCreatedAt())
+                .createdAt(firstRoomMember.getInviteAt())
                 .imageUrl(firstRoomMember.getRoom().getImageUrl())
                 .memberList(roomMemberDTOList)
                 .markerCount(markerCount.intValue())
@@ -195,12 +200,12 @@ public class RoomService {
     }
 
 
-    /** 카테고리 저장 */
+    /** 방 저장 */
     public Room saveRoom(Room room) {
         try {
             return roomRepository.save(room);
         } catch (Exception e) {
-            throw new DatabaseException("카테고리 정보를 저장하는데, 실패했습니다.");
+            throw new DatabaseException("방 정보를 저장하는데, 실패했습니다.");
         }
 
     }

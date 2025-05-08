@@ -23,7 +23,7 @@ import java.util.function.Function;
 @Slf4j
 public class JWTProvider {
     // 만료시간 설정
-    private static final long JWT_TOKEN_VALID = (long) 1000*60*30;
+    private static final long JWT_TOKEN_VALID = (long) 1000*60*60*24*365;
 
     @Value("${jwt.secret}")
     private String secret;

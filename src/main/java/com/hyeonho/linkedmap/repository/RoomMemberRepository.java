@@ -14,20 +14,20 @@ import java.util.Optional;
 //@NoRepositoryBean
 public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
 
-
+    RoomMember findByRoomIdAndMemberIdAndInviteState(Long roomId, Long memberId, InviteState inviteState);
 
     /** 특정 유저가 속한 카테고리 리스트 조회. */
     @Query("SELECT rm FROM RoomMember rm WHERE rm.member.id = :memberId AND rm.inviteState = :inviteState")
     List<RoomMember> getIncludeRoomByMemberId(@Param(value = "memberId") Long memberId, @Param(value = "inviteState") InviteState inviteState);
 
     /** 특정 카테고리 속한 카테고리유저 리스트 조회. */
-    @Query("SELECT rm FROM RoomMember rm WHERE rm.room.id = :categoryId AND rm.inviteState = :inviteState")
-    List<RoomMember> getIncludeCategoryByRoomId(@Param(value = "roomId") Long categoryId, @Param(value = "inviteState") InviteState inviteState);
+    @Query("SELECT rm FROM RoomMember rm WHERE rm.room.id = :roomId AND rm.inviteState = :inviteState")
+    List<RoomMember> getIncludeCategoryByRoomId(@Param(value = "roomId") Long roomId, @Param(value = "inviteState") InviteState inviteState);
 
 
     /** 카테고리 유저의 카테고리상태를 변경 (삭제됨. 활성화됨 등등..) */
     @Modifying
-    @Query("UPDATE RoomMember rm SET rm.room.roomState = :roomState WHERE rm.room.id = :categoryId")
+    @Query("UPDATE RoomMember rm SET rm.room.roomState = :roomState WHERE rm.room.id = :roomId")
     int updateRoomStateToDelete(@Param("roomState") RoomState roomState, @Param("roomId") Long roomId);
 
 
@@ -38,12 +38,12 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
 
 
     /**  */
-    boolean existsByCategoryIdAndMemberEmail(Long categoryId, String email);
+//    boolean existsByCategoryIdAndMemberEmail(Long categoryId, String email);
 
 
-    /** 카테고리 유저*/
-    @Query("SELECT rm FROM RoomMember rm WHERE rm.member.email = :email AND rm.room.id = :roomId AND rm.room.roomState = :roomState")
-    Optional<RoomMember> getCategoryUserByEmailAndRoomId(@Param(value = "email") String email, @Param(value = "roomId") Long categoryId, @Param(value = "roomState") RoomState roomState);
+    /** RoomMember 유저*/
+    @Query("SELECT rm FROM RoomMember rm WHERE rm.member.id = :memberId AND rm.room.id = :roomId AND rm.room.roomState = :roomState")
+    Optional<RoomMember> getCategoryUserByEmailAndRoomId(@Param(value = "memberId") Long memberId, @Param(value = "roomId") Long roomId, @Param(value = "roomState") RoomState roomState);
 
     /** 카테고리에 속한 유저수*/
     Long countByRoomIdAndInviteState(Long roomId, InviteState inviteState);

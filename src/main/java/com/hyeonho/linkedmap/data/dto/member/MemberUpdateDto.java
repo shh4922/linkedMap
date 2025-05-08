@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 public class MemberUpdateDto {
 
+    private Long memberId;
     private String email;
     private String username;
     private String profileImage;
@@ -17,7 +18,8 @@ public class MemberUpdateDto {
     private LocalDateTime updateAt;
 
     @Builder
-    public MemberUpdateDto(String email, String username, String profileImage, LocalDateTime createdAt, LocalDateTime updateAt) {
+    public MemberUpdateDto(Long memberId, String email, String username, String profileImage, LocalDateTime createdAt, LocalDateTime updateAt) {
+        this.memberId = memberId;
         this.email = email;
         this.username = username;
         this.profileImage = profileImage;

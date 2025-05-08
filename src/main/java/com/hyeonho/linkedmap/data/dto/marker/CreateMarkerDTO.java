@@ -1,5 +1,6 @@
 package com.hyeonho.linkedmap.data.dto.marker;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hyeonho.linkedmap.entity.Marker;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,20 +13,26 @@ public class CreateMarkerDTO {
     private Long id;
     private BigDecimal lat;
     private BigDecimal lng;
+
     private String title;
     private String description;
     private String address;
     private String roadAddress;
     private String storeType;
+
     private String imageUrl;
-    private String creator; // 작성자 email
-    private Long categoryId;
+    private String creatorEmail; // 만든사람 email
+    private String creatorName; // 만든사람 이름
+    private Long roomId;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime updatedAt;
+
     @Builder
-    public CreateMarkerDTO(Long id, BigDecimal lat, BigDecimal lng, String title,
-                          String description, String address, String roadAddress,
-                          String storeType, String imageUrl, String creator, LocalDateTime createdAt, Long categoryId) {
+    public CreateMarkerDTO(Long id, BigDecimal lat, BigDecimal lng, String title, String description, String address, String roadAddress, String storeType, String imageUrl, String creatorEmail, String creatorName, Long roomId, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.lat = lat;
         this.lng = lng;
@@ -35,9 +42,11 @@ public class CreateMarkerDTO {
         this.roadAddress = roadAddress;
         this.storeType = storeType;
         this.imageUrl = imageUrl;
-        this.creator = creator;
+        this.creatorEmail = creatorEmail;
+        this.creatorName = creatorName;
+        this.roomId = roomId;
         this.createdAt = createdAt;
-        this.categoryId = categoryId;
+        this.updatedAt = updatedAt;
     }
 
     public static CreateMarkerDTO from(Marker marker) {
@@ -45,15 +54,21 @@ public class CreateMarkerDTO {
                 .id(marker.getId())
                 .lat(marker.getLat())
                 .lng(marker.getLng())
+
                 .title(marker.getTitle())
                 .description(marker.getDescription())
                 .address(marker.getAddress())
                 .roadAddress(marker.getRoadAddress())
                 .storeType(marker.getStoreType())
                 .imageUrl(marker.getImageUrl())
-                .creator(marker.getMember().getEmail())
+
+                .creatorEmail(marker.getMember().getEmail())
+                .creatorName(marker.getMember().getUsername())
+                .roomId(marker.getRoom().getId())
+
                 .createdAt(marker.getCreatedAt())
-                .categoryId(marker.getRoom().getId())
+                .updatedAt(marker.getUpdatedAt())
+
                 .build();
     }
 }

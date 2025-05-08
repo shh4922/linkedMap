@@ -35,63 +35,70 @@ public class MarkerService {
      * 유저가 권한이 있는지 체크 (ReadOnly x)
      *
      */
-    public CreateMarkerDTO createMarker(CreateMarkerRequest req, String email) {
-       RoomMember roomMember = getCategoryUserByEmailAndCategoryId(email, req.getCategoryId());
+    public CreateMarkerDTO createMarker(CreateMarkerRequest req, Long memberId) {
+       RoomMember roomMember = getRoomMemberByMemberIdAndRoomId(memberId, req.getRoomId());
 
-       /** 추방당함 또는 카테고리 를 나간경우 */
+       // 초대되지 않은 유저인 경우
        if(!roomMember.getInviteState().equals(InviteState.INVITE)) {
            throw new PermissionException("권한이 없습니다");
        }
 
-       /** 권한이 없는경우 */
-       if(roomMember.getRoomMemberRole().equals(RoomMemberRole.READ_ONLY)) { //403
+       // 생성 권한이 없는경우
+       if(roomMember.getRoomMemberRole().equals(RoomMemberRole.READ_ONLY)) { // 403
            throw new PermissionException("권한이 없습니다");
        }
 
-       Room room = roomRepository.findById(req.getCategoryId()) // 403
-               .orElseThrow(() -> new InvalidRequestException("해당 카테고리가 존재하지않습니다"));
+       // 화면단에서 roomId 잘못 보냈을떄
+       Room room = roomRepository.findById(req.getRoomId())
+               .orElseThrow(() -> new InvalidRequestException("존재하지 않는 방입니다"));
 
-       Member member = memberRepository.findById(email)
+       Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
                .orElseThrow(() -> new InvalidRequestException("유저없음"));
 
        Marker marker = Marker.builder()
                .request(req)
                .member(member)
-               .category(room)
+               .room(room)
                .build();
 
-       markerRepository.save(marker);
-       return CreateMarkerDTO.from(marker);
+       Marker saveMarker = markerRepository.save(marker);
+       return CreateMarkerDTO.from(saveMarker);
     }
 
-//    /** 특정 카테고리의 마커개수 요청*/
+     /** 특정 카테고리의 마커개수 요청*/
     public Long getMarkerCountByRoomId(Long roomId) {
         return markerRepository.countByRoomId(roomId);
     }
 
-
-    public List<CreateMarkerDTO> getMarkerListByCategoryId(String email, Long categoryId) {
+    /**
+     * 방에 있는 마커리스트 조회
+     * @param memberId
+     * @param categoryId
+     * @return
+     */
+    public List<CreateMarkerDTO> getMarkerListByRoomId(Long memberId, Long categoryId) {
         // 카테고리가 삭제되었으면 애초에 조회가 안됌
-        RoomMember roomMember = getCategoryUserByEmailAndCategoryId(email, categoryId);
+        RoomMember roomMember = getRoomMemberByMemberIdAndRoomId(memberId, categoryId);
 
-        /** 추방당함 또는 카테고리 를 나간경우 */
+        // 해당 방 유저가 아닌경우. -> InviteState가 INVITE가 아닌경우
         if(!roomMember.getInviteState().equals(InviteState.INVITE)) {
             throw new PermissionException("권한이 없습니다");
         }
 
         List<Marker> markerList = markerRepository.getMarkerList(categoryId);
+
         return markerList.stream()
                 .map(CreateMarkerDTO::from)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public CreateMarkerDTO updateMarker(String email, UpdateMarkerRequest req) {
+    public CreateMarkerDTO updateMarker(Long memberId, UpdateMarkerRequest req) {
         Marker marker = findMarkerById(req.getId());
 
-        String creatorEmail = marker.getMember().getEmail();
+        Long creatorId = marker.getMember().getId();
 
-        boolean isPermission = checkMarkerPermission(email, creatorEmail, marker.getRoom().getId());
+        boolean isPermission = checkMarkerPermission(memberId, creatorId, marker.getRoom().getId());
 
         if(!isPermission) { throw new PermissionException("권한이 없습니다");}
 
@@ -101,10 +108,12 @@ public class MarkerService {
     }
 
     @Transactional
-    public Marker deleteMarker(String email, Long markerId) {
+    public Marker deleteMarker(Long memberId, Long markerId) {
         Marker marker = findMarkerById(markerId);
+        Long creatorId = marker.getMember().getId();
+        Long roomId = marker.getRoom().getId();
 
-        boolean isPermission = checkMarkerPermission(email,marker.getMember().getEmail(), marker.getRoom().getId());
+        boolean isPermission = checkMarkerPermission(memberId, creatorId, roomId);
 
         if(!isPermission) { throw new PermissionException("권한이 없습니다");}
 
@@ -112,41 +121,45 @@ public class MarkerService {
         return marker;
     }
 
+    /** 마커를 찾는 메서드
+     * 마커가 존재하지 않으면 예외를 던짐
+     * 마커가 삭제된 상태면 예외를 던짐
+     * */
     private Marker findMarkerById(Long markerId) {
         return markerRepository.findByIdAndDeletedAtIsNull(markerId)
                 .orElseThrow(() -> new InvalidRequestException("해당Id의 마커를 찾을수 없음"));
     }
 
 
-    /** 권한 체크
-     * 방장, 내가 생성한 마커, 나보다 권한이 낮은경우: true
-     * 나머지 false
+    /** 카테고리 유저가 해당 카테고리에 속해있는지 체크
+     * 카테고리 유저가 삭제된 상태인지 체크
+     * 카테고리가 Active 상태인지 체크
      * */
-    private boolean checkMarkerPermission(String myEmail, String creatorEmail, Long categoryId) {
-        RoomMember me = roomMemberRepository.getCategoryUserByEmailAndRoomId(myEmail, categoryId, RoomState.ACTIVE)
-                .orElseThrow(() -> new InvalidRequestException("마커 생성자가 카테고리에 속해있지 않습니다."));
+    private boolean checkMarkerPermission(Long memberId, Long creatorId, Long roomId) {
+        // 내가 해당 방 소속인지 체크
+        RoomMember me = getRoomMemberByMemberIdAndRoomId(memberId, roomId);
 
-        RoomMember creator = roomMemberRepository.getCategoryUserByEmailAndRoomId(creatorEmail, categoryId, RoomState.ACTIVE)
-                .orElseThrow(() -> new InvalidRequestException("해당 카테고리 소속이 아닙니다."));
+        // 생성자가 해당방 소속인지 체크
+        RoomMember creator = getRoomMemberByMemberIdAndRoomId(creatorId, roomId);
 
         RoomMemberRole myPermission = me.getRoomMemberRole();
 
-        // 내가 방장인 경우 필터링
+        // 내가 방장인 경우 true
         if(myPermission.equals(RoomMemberRole.OWNER)) {
             return true;
         }
 
-        // 내가 생성자인 경우 필터링
-        if(me.getMember().getEmail().equals(creator.getMember().getEmail())) {
+        // 내가 생성자인 경우 true
+        if(me.getMember().getId().equals(creator.getMember().getId())) {
             return true;
         }
 
-        // 일반 유저, ReadOnly 필터링
+        // 내 권한이 readOnly 인 경우 false
         if(!myPermission.equals(RoomMemberRole.MANAGER)) {
             return false;
         }
 
-        // 방장이 만든경우 필터링
+        // 방장이 만든경우 false
         if(creator.getRoomMemberRole().equals(RoomMemberRole.OWNER)) {
             return false;
         }
@@ -163,11 +176,12 @@ public class MarkerService {
 
 
 
-
-
-
-    private RoomMember getCategoryUserByEmailAndCategoryId(String email, Long categoryId) {
-        return roomMemberRepository.getCategoryUserByEmailAndRoomId(email, categoryId, RoomState.ACTIVE)
+    /** RoomMember 를 찾는 메서드
+     * RoomMember 가 존재하지 않으면 예외를 던짐
+     * Room이 삭제된 상태면 예외를 던짐
+     * */
+    private RoomMember getRoomMemberByMemberIdAndRoomId(Long memberId, Long roomId) {
+        return roomMemberRepository.getCategoryUserByEmailAndRoomId(memberId, roomId, RoomState.ACTIVE)
                 .orElseThrow(() -> new InvalidRequestException("해당 카테고리유저를 찾을수 없습니다."));
     }
 }

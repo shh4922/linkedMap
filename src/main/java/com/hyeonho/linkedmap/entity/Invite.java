@@ -17,11 +17,11 @@ public class Invite {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "category_id", nullable = false)
-    private Long categoryId;
+    @Column(name = "room_id", nullable = false)
+    private Long roomId;
 
     @Column(name = "invitor", nullable = false)
-    private String invitor;
+    private Long invitor;
 
     @Column(name = "invited_member", nullable = true)
     private String invitedMember;
@@ -52,8 +52,8 @@ public class Invite {
 //    private Member invitedMember;
 
     @Builder
-    public Invite(Long categoryId, String invitor) {
-        this.categoryId = categoryId;
+    public Invite(Long roomId, Long invitor) {
+        this.roomId = roomId;
         this.invitor = invitor;
     }
 

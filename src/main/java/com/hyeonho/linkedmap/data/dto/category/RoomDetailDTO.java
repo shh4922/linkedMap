@@ -8,11 +8,14 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// TODO: CurrentRoomOwnerId 추가해야함.
+
 @Getter
 public class RoomDetailDTO {
     private Long roomId;                    // 방의 Id
     private String roomName;                // 방 명
     private String roomDescription;         // 방 설명
+    private Long currentRoomOwnerId;        // 방장 Id
     private String currentRoomOwnerName;    // 방장 이름
     private String currentRoomOwnerEmail;   // 방장 이메일
     private String createUserEmail;         // 생성자 이메일
@@ -28,6 +31,7 @@ public class RoomDetailDTO {
             Long roomId,
             String roomName,
             String roomDescription,
+            Long currentRoomOwnerId,
             String currentRoomOwnerName,
             String currentRoomOwnerEmail,
             String createUserEmail,
@@ -40,6 +44,7 @@ public class RoomDetailDTO {
         this.roomId = roomId;
         this.roomName = roomName;
         this.roomDescription = roomDescription;
+        this.currentRoomOwnerId = currentRoomOwnerId;
         this.currentRoomOwnerName = currentRoomOwnerName;
         this.currentRoomOwnerEmail = currentRoomOwnerEmail;
         this.createUserEmail = createUserEmail;

@@ -30,8 +30,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
+
         String token = null;
-//                request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
         }
@@ -78,14 +78,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     /**
      * token의 사용자 idx를 이용하여 사용자 정보 조회하고, UsernamePasswordAuthenticationToken 생성
      * 비밀번호는 딱히 저장안해도 된다고함, user정보랑, 권한만 저장하면 된다고 함
-     * @param email 사용자 idx
      * @return 사용자 UsernamePasswordAuthenticationToken
      */
-    private UsernamePasswordAuthenticationToken getUserAuth(String email) {
-        Member userInfo = memberService.findByEmail(email)
-                .orElseThrow(() -> new InvalidRequestException("해당 계정 없음"));
+    private UsernamePasswordAuthenticationToken getUserAuth(String memberId) {
+        Long id = Long.parseLong(memberId);
+        Member userInfo = memberService.findMemberById(id);
 
-        return new UsernamePasswordAuthenticationToken(userInfo.getEmail(),
+        return new UsernamePasswordAuthenticationToken(
+                userInfo.getId(),
                 userInfo.getPassword(),
                 Collections.singleton(new SimpleGrantedAuthority(userInfo.getRole().value()))
         );

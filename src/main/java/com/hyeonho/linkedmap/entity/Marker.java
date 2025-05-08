@@ -20,10 +20,10 @@ public class Marker {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, precision = 10, scale = 8)
+    @Column(precision = 11, scale = 8)
     private BigDecimal lat;
 
-    @Column(nullable = false, precision = 11, scale = 8)
+    @Column(precision = 11, scale = 8)
     private BigDecimal lng;
 
     @Column(nullable = false, length = 100)

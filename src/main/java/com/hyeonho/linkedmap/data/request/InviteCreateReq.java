@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class InviteCreateReq {
-    private Long categoryId;
+    private Long roomId;
 }

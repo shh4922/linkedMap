@@ -7,5 +7,5 @@ import java.util.UUID;
 @Getter
 public class RoomJoinRequest {
     private UUID inviteKey;
-    private Long categoryId;
+    private Long roomId;
 }

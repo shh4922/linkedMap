@@ -51,6 +51,7 @@ public class Room {
     public Room(Member member, CreateRoomRequest request) {
         this.creator = member;
         this.currentOwner = member;
+        this.roomState = RoomState.ACTIVE;
         this.name = request.getRoomName();
         if(request.getDescription() != null) {
             this.description = request.getDescription();
