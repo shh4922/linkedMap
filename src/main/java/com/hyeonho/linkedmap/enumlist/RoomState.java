@@ -1,4 +1,4 @@
-package com.hyeonho.linkedmap.entity;
+package com.hyeonho.linkedmap.enumlist;
 
 public enum RoomState {
     ACTIVE("ACTIVE"), // 활성화

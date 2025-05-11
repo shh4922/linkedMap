@@ -8,7 +8,7 @@ import com.hyeonho.linkedmap.data.request.room.CreateRoomRequest;
 import com.hyeonho.linkedmap.entity.Room;
 import com.hyeonho.linkedmap.entity.RoomMember;
 import com.hyeonho.linkedmap.entity.Member;
-import com.hyeonho.linkedmap.entity.RoomState;
+import com.hyeonho.linkedmap.enumlist.RoomState;
 import com.hyeonho.linkedmap.enumlist.RoomMemberRole;
 import com.hyeonho.linkedmap.enumlist.InviteState;
 import com.hyeonho.linkedmap.error.DatabaseException;

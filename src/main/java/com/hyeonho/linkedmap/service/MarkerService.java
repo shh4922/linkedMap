@@ -7,6 +7,7 @@ import com.hyeonho.linkedmap.data.request.marker.UpdateMarkerRequest;
 import com.hyeonho.linkedmap.entity.*;
 import com.hyeonho.linkedmap.enumlist.RoomMemberRole;
 import com.hyeonho.linkedmap.enumlist.InviteState;
+import com.hyeonho.linkedmap.enumlist.RoomState;
 import com.hyeonho.linkedmap.error.InvalidRequestException;
 import com.hyeonho.linkedmap.error.PermissionException;
 import com.hyeonho.linkedmap.repository.*;

@@ -1,16 +1,9 @@
 package com.hyeonho.linkedmap;
 
-import com.hyeonho.linkedmap.entity.Room;
-import com.hyeonho.linkedmap.entity.RoomState;
-import com.hyeonho.linkedmap.entity.RoomMember;
-import com.hyeonho.linkedmap.entity.Member;
-import com.hyeonho.linkedmap.enumlist.RoomMemberRole;
-import com.hyeonho.linkedmap.enumlist.InviteState;
 import com.hyeonho.linkedmap.repository.RoomRepository;
 import com.hyeonho.linkedmap.repository.RoomMemberRepository;
 import com.hyeonho.linkedmap.repository.MarkerRepository;
 import com.hyeonho.linkedmap.repository.MemberRepository;
-import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

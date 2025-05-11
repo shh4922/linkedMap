@@ -1,6 +1,6 @@
 package com.hyeonho.linkedmap.repository;
 
-import com.hyeonho.linkedmap.entity.RoomState;
+import com.hyeonho.linkedmap.enumlist.RoomState;
 import com.hyeonho.linkedmap.entity.RoomMember;
 import com.hyeonho.linkedmap.enumlist.InviteState;
 import org.springframework.data.jpa.repository.JpaRepository;

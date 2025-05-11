@@ -33,7 +33,7 @@ public class MarkerController {
         return ResponseEntity.ok(DefaultResponse.success(markerDTO));
     }
 
-    @GetMapping("/markers/{categoryId}")
+    @GetMapping("/markers/{roomId}")
     public ResponseEntity<DefaultResponse<List<CreateMarkerDTO>>> getMarkerListByCategoryId(@AuthenticationPrincipal Long memberId, @PathVariable(value = "roomId") Long roomId) {
         List<CreateMarkerDTO> markerDTOS = markerService.getMarkerListByRoomId(memberId, roomId);
         return ResponseEntity.ok(DefaultResponse.success(markerDTOS));

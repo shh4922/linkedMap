@@ -2,6 +2,7 @@ package com.hyeonho.linkedmap.entity;
 
 import com.hyeonho.linkedmap.data.request.room.RoomUpdateRequest;
 import com.hyeonho.linkedmap.data.request.room.CreateRoomRequest;
+import com.hyeonho.linkedmap.enumlist.RoomState;
 import jakarta.persistence.*;
 import lombok.*;
 
