@@ -21,8 +21,9 @@ public class CreateMarkerDTO {
     private String storeType;
 
     private String imageUrl;
-    private String creatorEmail; // 만든사람 email
-    private String creatorName; // 만든사람 이름
+    private String creatorEmail;    // 만든사람 email
+    private String creatorName;     // 만든사람 이름
+    private String creatorRole;     // 만든사람 권한
     private Long roomId;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -32,7 +33,7 @@ public class CreateMarkerDTO {
     private LocalDateTime updatedAt;
 
     @Builder
-    public CreateMarkerDTO(Long id, BigDecimal lat, BigDecimal lng, String title, String description, String address, String roadAddress, String storeType, String imageUrl, String creatorEmail, String creatorName, Long roomId, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public CreateMarkerDTO(Long id, BigDecimal lat, BigDecimal lng, String title, String description, String address, String roadAddress, String storeType, String imageUrl, String creatorEmail, String creatorName, Long roomId, LocalDateTime createdAt, LocalDateTime updatedAt, String creatorRole) {
         this.id = id;
         this.lat = lat;
         this.lng = lng;
@@ -47,6 +48,7 @@ public class CreateMarkerDTO {
         this.roomId = roomId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.creatorRole = creatorRole;
     }
 
     public static CreateMarkerDTO from(Marker marker) {
@@ -64,6 +66,7 @@ public class CreateMarkerDTO {
 
                 .creatorEmail(marker.getMember().getEmail())
                 .creatorName(marker.getMember().getUsername())
+//                .creatorRole(marker.getMember())
                 .roomId(marker.getRoom().getId())
 
                 .createdAt(marker.getCreatedAt())
