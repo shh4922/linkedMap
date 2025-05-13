@@ -68,7 +68,7 @@ public class MarkerService {
 
      /** 특정 카테고리의 마커개수 요청*/
     public Long getMarkerCountByRoomId(Long roomId) {
-        return markerRepository.countByRoomId(roomId);
+        return markerRepository.countByRoomIdAndDeletedAtIsNull(roomId);
     }
 
     /**

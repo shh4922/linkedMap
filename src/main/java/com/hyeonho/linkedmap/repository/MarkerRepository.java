@@ -16,5 +16,5 @@ public interface MarkerRepository extends JpaRepository<Marker, Long> {
 
     Optional<Marker> findByIdAndDeletedAtIsNull(Long id);
 
-    Long countByRoomId(Long roomId);
+    Long countByRoomIdAndDeletedAtIsNull(Long roomId);
 }
