@@ -52,6 +52,12 @@ public class MemberController {
         return ResponseEntity.ok(DefaultResponse.success(responseDTO));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<DefaultResponse<String>> logout(@AuthenticationPrincipal Long id) {
+        String res = memberService.logout(id);
+        return ResponseEntity.ok(DefaultResponse.success(res));
+    }
+
     /**
      * 내 정보 조회
      * 내 정보 찾은후, 이메일, 이름, 역할만 리턴함

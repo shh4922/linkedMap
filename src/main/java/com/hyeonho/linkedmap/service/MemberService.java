@@ -105,7 +105,7 @@ public class MemberService {
             throw new InvalidRequestException("비밀번호 틀림");
         }
 
-        // jwt 토큰 생성œœ
+        // jwt 토큰 생성
         String accessToken = jwtProvider.generateAccessToken(userInfo.getId());
 
         // 기존에 가지고 있는 사용자의 refresh token 제거
@@ -120,6 +120,14 @@ public class MemberService {
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
                     .build();
+    }
+
+    public String logout(Long id) {
+        Member userInfo = findMemberById(id);
+        if(RefreshToken.removeUserRefreshToken(userInfo.getId())) {
+            return "0";
+        }
+        return "-1";
     }
 
     /** 내정보 업데이트 */

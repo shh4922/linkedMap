@@ -45,7 +45,7 @@ public class RefreshToken {
 //        refreshTokens.entrySet().removeIf(entry -> entry.getValue(). equals(email));
 //    }
 
-    public static void removeUserRefreshToken(final Long id) {
-        refreshTokens.entrySet().removeIf(entry -> entry.getValue(). equals(id));
+    public static boolean removeUserRefreshToken(final Long id) {
+        return refreshTokens.entrySet().removeIf(entry -> entry.getValue(). equals(id));
     }
 }

@@ -15,6 +15,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Configuration
@@ -75,5 +78,16 @@ public class SecurityConfig {
         return http.build();
     }
 
-
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.addAllowedOrigin("*");  // 또는 .addAllowedOriginPattern("*");
+//        config.addAllowedMethod("*");
+//        config.addAllowedHeader("*");
+//        config.setAllowCredentials(false);  // JWT는 헤더로만 가니 false로 충분
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", config);
+//        return source;
+//    }
 }
