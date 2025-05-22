@@ -48,6 +48,8 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
     @Query("SELECT rm FROM RoomMember rm WHERE rm.member.id = :memberId AND rm.room.id = :roomId AND rm.room.roomState = :roomState")
     Optional<RoomMember> getRoomMemberByMemberIdAndRoomId(@Param(value = "memberId") Long memberId, @Param(value = "roomId") Long roomId, @Param(value = "roomState") RoomState roomState);
 
+
+
     /** 카테고리에 속한 유저수*/
     Long countByRoomIdAndInviteState(Long roomId, InviteState inviteState);
 }

@@ -115,14 +115,15 @@ public class RoomService {
 
 
         List<RoomMemberDTO> roomMemberDTOList = roomMemberList.stream()
-                .map(categoryUser -> {
-                    Member member = categoryUser.getMember();
+                .map(roomMember -> {
+                    Member member = roomMember.getMember();
                     return RoomMemberDTO.builder()
+                            .roomMemberId(roomMember.getId())
                             .memberId(member.getId())
                             .name(member.getUsername())
-                            .role(categoryUser.getRoomMemberRole().name())
+                            .role(roomMember.getRoomMemberRole().name())
                             .email(member.getEmail())
-                            .inviteDate(categoryUser.getInviteAt())
+                            .inviteDate(roomMember.getInviteAt())
                             .build();
                 })
                 .toList();
