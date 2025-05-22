@@ -182,7 +182,7 @@ public class MarkerService {
      * Room이 삭제된 상태면 예외를 던짐
      * */
     private RoomMember getRoomMemberByMemberIdAndRoomId(Long memberId, Long roomId) {
-        return roomMemberRepository.getCategoryUserByEmailAndRoomId(memberId, roomId, RoomState.ACTIVE)
+        return roomMemberRepository.getRoomMemberByMemberIdAndRoomId(memberId, roomId, RoomState.ACTIVE)
                 .orElseThrow(() -> new InvalidRequestException("해당 카테고리유저를 찾을수 없습니다."));
     }
 }

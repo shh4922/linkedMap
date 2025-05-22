@@ -118,6 +118,7 @@ public class RoomService {
                 .map(categoryUser -> {
                     Member member = categoryUser.getMember();
                     return RoomMemberDTO.builder()
+                            .memberId(member.getId())
                             .name(member.getUsername())
                             .role(categoryUser.getRoomMemberRole().name())
                             .email(member.getEmail())

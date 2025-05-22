@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class RoomMemberDTO {
+    private Long memberId;
     private String email;
     private String name;
     private String role;
@@ -16,7 +17,8 @@ public class RoomMemberDTO {
     private LocalDateTime inviteDate;
 
     @Builder
-    public RoomMemberDTO(String email, String name, String role, LocalDateTime inviteDate) {
+    public RoomMemberDTO(Long memberId, String email, String name, String role, LocalDateTime inviteDate) {
+        this.memberId = memberId;
         this.email = email;
         this.name = name;
         this.role = role;

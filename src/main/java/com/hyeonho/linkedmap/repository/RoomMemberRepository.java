@@ -1,5 +1,6 @@
 package com.hyeonho.linkedmap.repository;
 
+import com.hyeonho.linkedmap.enumlist.RoomMemberRole;
 import com.hyeonho.linkedmap.enumlist.RoomState;
 import com.hyeonho.linkedmap.entity.RoomMember;
 import com.hyeonho.linkedmap.enumlist.InviteState;
@@ -37,13 +38,15 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
     int updateInviteStatusToDelete(@Param("inviteState") InviteState inviteState, @Param("roomId") Long roomId, @Param("memberId") Long memberId);
 
 
-    /**  */
-//    boolean existsByCategoryIdAndMemberEmail(Long categoryId, String email);
+    /** 유저의 권한을 변경*/
+    @Modifying
+    @Query("UPDATE RoomMember rm SET rm.roomMemberRole = :roomMemberRole WHERE rm.id = :id")
+    int updateRoomMemberRoleById(@Param("roomMemberRole") RoomMemberRole roomMemberRole, @Param("id") Long id);
 
 
     /** RoomMember 유저*/
     @Query("SELECT rm FROM RoomMember rm WHERE rm.member.id = :memberId AND rm.room.id = :roomId AND rm.room.roomState = :roomState")
-    Optional<RoomMember> getCategoryUserByEmailAndRoomId(@Param(value = "memberId") Long memberId, @Param(value = "roomId") Long roomId, @Param(value = "roomState") RoomState roomState);
+    Optional<RoomMember> getRoomMemberByMemberIdAndRoomId(@Param(value = "memberId") Long memberId, @Param(value = "roomId") Long roomId, @Param(value = "roomState") RoomState roomState);
 
     /** 카테고리에 속한 유저수*/
     Long countByRoomIdAndInviteState(Long roomId, InviteState inviteState);
