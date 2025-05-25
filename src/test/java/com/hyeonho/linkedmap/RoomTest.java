@@ -1,78 +1,65 @@
-package com.hyeonho.linkedmap;
-
-import com.hyeonho.linkedmap.repository.RoomRepository;
-import com.hyeonho.linkedmap.repository.RoomMemberRepository;
-import com.hyeonho.linkedmap.repository.MarkerRepository;
-import com.hyeonho.linkedmap.repository.MemberRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-
-@SpringBootTest
-public class RoomTest {
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private RoomRepository roomRepository;
-
-    @Autowired
-    private RoomMemberRepository roomMemberRepository;
-
-    @Autowired
-    private MarkerRepository markerRepository;
-    private static final Logger log = LoggerFactory.getLogger(RoomTest.class);
-
-
-//    @Test
-//    public void 카테고리생성() {
-//        Member member = memberRepository.findById("test222@test.com").orElseThrow();
+//package com.hyeonho.linkedmap;
 //
-//        Room room = new Room(member,"카테고리2");
-//        roomRepository.save(room);
+//import com.hyeonho.linkedmap.member.Member;
+//import com.hyeonho.linkedmap.roommember.RoomMember;
+//import com.hyeonho.linkedmap.invite.InviteState;
+//import com.hyeonho.linkedmap.room.repository.RoomRepository;
+//import com.hyeonho.linkedmap.roommember.RoomMemberRepository;
+//import com.hyeonho.linkedmap.marker.MarkerRepository;
+//import com.hyeonho.linkedmap.member.MemberRepository;
+//import jakarta.persistence.EntityManager;
+//import org.junit.jupiter.api.Test;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.test.context.SpringBootTest;
 //
-//        RoomMember roomMember = new RoomMember(room, member, InviteState.INVITE, RoomMemberRole.OWNER, RoomState.ACTIVE);
-//        roomMemberRepository.save(roomMember);
-//    }
-
-//    @Test
-//    public void 유저가속한_카테고리_리스트조회() {
-//        List<CategoryUser> categoryList = categoryUserRepository.getIncludeCategoryByEmail("test111@test.com");
-//        List<CategoryUser> filterdCategoryList = categoryList.stream()
-//                .filter(category -> category.getDeletedAt() == null)
-//                        .toList();
-//        log.info("filtered", filterdCategoryList);
-//    }
+//import java.util.List;
+//
+//
+//@SpringBootTest
+//public class RoomTest {
+//
+//    @Autowired
+//    private MemberRepository memberRepository;
+//
+//    @Autowired
+//    private RoomRepository roomRepository;
+//
+//    @Autowired
+//    private RoomMemberRepository roomMemberRepository;
+//
+//    @Autowired
+//    private MarkerRepository markerRepository;
+//    private static final Logger log = LoggerFactory.getLogger(RoomTest.class);
+//
+//    @Autowired
+//    private EntityManager entityManager;
 //
 //    @Test
-//    public void 카테고리업데이트() {
-//        CategoryUpdateReq categoryUpdateReq = new CategoryUpdateReq();
-//        categoryUpdateReq.setMemberEmail("test111@test.com");
-//        categoryUpdateReq.setCategoryId(1L);
-//        categoryUpdateReq.setCategoryName("업데이트한 카테고리2");
+//    public void 패치조인없이_특정방에속한_유저리스트_조회() {
+//        Long roomId = 2L;
 //
-//        Category category = categoryRepository.findById(categoryUpdateReq.getCategoryId()).orElseThrow();
-//        if(category.getOwner().getEmail().equals(categoryUpdateReq.getMemberEmail())) {
-//            category.update(categoryUpdateReq);
-//            categoryRepository.save(category);
-//        }
+//        List<RoomMember> memberList = roomMemberRepository.getRoomMemberListByRoomId(roomId, InviteState.INVITE);
+//        log.info("memberList-Length: {}", memberList.size());
+//
+//        memberList.stream().forEach(roomMember -> {
+//            Member member = roomMember.getMember();
+//            log.info("member: {}", member.getId());
+//        });
 //    }
-
-//    @Test
-//    public void 카테고리_삭제() {
-//        DeleteCategoryReq deleteCategoryReq = new DeleteCategoryReq();
-//        deleteCategoryReq.setEmail("test111@test.com");
-//        deleteCategoryReq.setCategoryId(2L);
 //
-//        Category category = categoryRepository.findById(deleteCategoryReq.getCategoryId()).orElseThrow();
-//        if(category.getOwner().getEmail().equals(deleteCategoryReq.getEmail())) {
-//            category.delete();
-//            categoryRepository.save(category);
+////    @Test
+////    public void 패치조인_특정방에속한_유저리스트_조회() {
+////        Long roomId = 1L;
+////
+////        List<RoomMember> memberList = roomMemberRepository.test(roomId, InviteState.INVITE);
+////        log.info("memberList-Length: {}", memberList.size());
+////
+////        memberList.stream().forEach(roomMember -> {
+////            Member member = roomMember.getMember();
+////            log.info("member: {}", member.getId());
+////        });
+////    }
 //
-//            // TODO: 카테고리유저Repo 에서 삭제하면 해당 카테고리Id 찾아서 다들 delete 삭제해주어야함.
-//        }
-//    }
-}
+//}

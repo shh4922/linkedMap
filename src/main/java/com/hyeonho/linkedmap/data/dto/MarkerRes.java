@@ -1,8 +1,6 @@
 package com.hyeonho.linkedmap.data.dto;
 
-import com.hyeonho.linkedmap.entity.Marker;
-import com.hyeonho.linkedmap.entity.Member;
-import jakarta.persistence.Column;
+import com.hyeonho.linkedmap.marker.Marker;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
