@@ -2,6 +2,8 @@ package com.hyeonho.linkedmap.s3;
 
 import lombok.Getter;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -35,13 +37,23 @@ public class S3Service {
 
         // 5분 동안 유효한 URL 생성
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(5))
+                .signatureDuration(Duration.ofMinutes(10))
                 .putObjectRequest(objectRequest)
                 .build();
 
         PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
         return presignedRequest.url().toString();
     }
+
+//    public void copyRequestToS3(String key, String contentType) {
+//        CopyObjectRequest copyReq = CopyObjectRequest.builder()
+//                .sourceBucket(bucket)
+//                .sourceKey("rooms/temp-91f3a123/IMG_123.jpg")
+//                .destinationBucket("linkedmap")
+//                .destinationKey("rooms/42/IMG_123.jpg")
+//                .build();
+//        s3Client.copyObject(copyReq);
+//    }
 
 
 }

@@ -129,7 +129,7 @@ public class RoomController {
      * @return
      */
     @PutMapping("/room/update")
-    public ResponseEntity<DefaultResponse<Room>> updateCategory(@AuthenticationPrincipal Long memberId, @RequestBody RoomUpdateRequest req) {
+    public ResponseEntity<DefaultResponse<String>> updateCategory(@AuthenticationPrincipal Long memberId, @RequestBody RoomUpdateRequest req) {
         return ResponseEntity.ok(DefaultResponse.success(roomService.updateRoom(memberId,req)));
     }
 

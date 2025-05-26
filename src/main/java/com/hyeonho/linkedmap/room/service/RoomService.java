@@ -19,6 +19,7 @@ import com.hyeonho.linkedmap.error.PermissionException;
 import com.hyeonho.linkedmap.room.repository.RoomRepository;
 import com.hyeonho.linkedmap.marker.MarkerService;
 import com.hyeonho.linkedmap.roommember.RoomMemberRepository;
+import com.hyeonho.linkedmap.s3.S3Service;
 import io.micrometer.common.lang.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class RoomService {
     private final MemberRepository memberRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final MarkerService markerService;
+    private final S3Service s3Service;
 
     /**
      * 방 생성
@@ -51,6 +53,12 @@ public class RoomService {
 
             Room room = new Room(member, request);
             saveRoom(room);
+
+//            if(request.getImageUrl() != null) {
+//                String key = request.getImageUrl();
+//                String dummyUrl = s3Service.generateUploadUrl(key,request.getContentType());
+//
+//            }
 
             // 방 생성후 RoomMember에 해당 유저 추가
             RoomMember roomMember = new RoomMember(room, member, InviteState.INVITE, RoomMemberRole.OWNER);
@@ -184,14 +192,14 @@ public class RoomService {
         }
     }
 
-    public Room updateRoom(Long memberId, RoomUpdateRequest req) {
+    public String updateRoom(Long memberId, RoomUpdateRequest req) {
         Room room = findRoomByRoomId(req.getRoomId());
         if(!room.getCurrentOwner().getId().equals(memberId)) {
             throw new PermissionException("권한이 없습니다.");
         }
 
         room.update(req);
-        return room;
+        return "방 정보가 수정되었습니다.";
     }
 
 
