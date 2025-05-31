@@ -74,12 +74,13 @@ public class Room {
         if (req.getRoomName() != null) {
             this.name = req.getRoomName();
         }
-        if(req.getImageUrl() != null) {
-            this.imageUrl = req.getImageUrl();
-        }
         if(req.getDescription() != null) {
             this.description = req.getDescription();
         }
+    }
+
+    public void uploadImage(String url) {
+        this.imageUrl = url;
     }
 
     public void delete() {

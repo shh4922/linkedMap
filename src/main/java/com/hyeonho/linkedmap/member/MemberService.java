@@ -160,8 +160,8 @@ public class MemberService {
          * 그런데, 내가 방장이면 RoomState를 DELETE로 업데이트
          */
         includeRoomList.forEach(roomMember -> {
-            if(roomMember.getRoomMemberRole() == RoomMemberRole.OWNER) { // 본인이 만든거면 카테고리 삭제
-                roomService.deleteMyRoom(member.getId(), roomMember.getRoom().getId(),null);
+            if(roomMember.getRoomMemberRole() == RoomMemberRole.OWNER) {
+                roomService.deleteMyRoom(member.getId(), roomMember.getRoom().getId());
             } else { // 다른 카테고리에 속한거라면 나가기 처리
                 roomService.getOutRoom(member.getId(), roomMember.getRoom().getId());
             }

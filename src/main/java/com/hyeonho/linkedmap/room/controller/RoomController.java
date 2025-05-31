@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -35,13 +36,15 @@ public class RoomController {
 
     /** 방 생성 */
     @PostMapping("/room/create")
-    public ResponseEntity<DefaultResponse<String>> createRoom(@AuthenticationPrincipal Long id, @RequestBody CreateRoomRequest request) {
+    public ResponseEntity<DefaultResponse<String>> createRoom(@AuthenticationPrincipal Long id,
+                                                              @RequestPart("image") Optional<MultipartFile> file,
+                                                              @RequestPart("dto") CreateRoomRequest request) {
 
         if(request.getRoomName().isEmpty()) {
             return ResponseEntity.ok(DefaultResponse.error(400,"필수항목이 비어있습니다."));
         }
 
-        Room room = roomService.createRoom(id,request);
+        Room room = roomService.createRoom(id,file, request);
         if(room != null) {
             return ResponseEntity.ok(DefaultResponse.success("1"));
         }
@@ -95,13 +98,13 @@ public class RoomController {
      * 방 삭제 (방의 방장이 해당 방을 삭제함)
      * 방 삭제시, RoomMember 있는 곳에 deleted_at 시간 또한 업데이트 해주어야함.
      * RoomMember 가 있는 해당 Room의 roomState 를 Delete로 변경
-     * @param req
      * @return
      */
-    @DeleteMapping("/room")
-    public ResponseEntity<DefaultResponse<String>> deleteRoom(@AuthenticationPrincipal Long memberId, @RequestBody DeleteRoomRequest req) {
-        if(req.getRoomId() == null) { throw new InvalidRequestException("방 아이디값 없음"); }
-        Room room = roomService.deleteMyRoom(memberId, req.getRoomId(), null);
+    @DeleteMapping("/room/{roomId}")
+    public ResponseEntity<DefaultResponse<String>> deleteRoom(@AuthenticationPrincipal Long memberId, @PathVariable("roomId") Long roomId) {
+        if(roomId == null) { throw new InvalidRequestException("방 아이디값 없음"); }
+
+        Room room = roomService.deleteMyRoom(memberId, roomId);
         if(room.getDeletedAt() == null) {
             return ResponseEntity.ok(DefaultResponse.error(400,"삭제실패"));
         }
@@ -124,13 +127,16 @@ public class RoomController {
 
 
     /**
-     * 방 방장인지 체크후, 수정
+     * 방 업데이트
+     * 방장인지 체크후 업데이트
      * @param req
      * @return
      */
     @PutMapping("/room/update")
-    public ResponseEntity<DefaultResponse<String>> updateCategory(@AuthenticationPrincipal Long memberId, @RequestBody RoomUpdateRequest req) {
-        return ResponseEntity.ok(DefaultResponse.success(roomService.updateRoom(memberId,req)));
+    public ResponseEntity<DefaultResponse<String>> updateCategory(@AuthenticationPrincipal Long memberId,
+                                                                  @RequestPart("image") Optional<MultipartFile> file,
+                                                                  @RequestPart("dto") RoomUpdateRequest request) {
+        return ResponseEntity.ok(DefaultResponse.success(roomService.updateRoom(memberId, file, request)));
     }
 
 

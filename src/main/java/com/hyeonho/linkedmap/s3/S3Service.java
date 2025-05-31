@@ -1,25 +1,34 @@
 package com.hyeonho.linkedmap.s3;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
+import java.io.IOException;
 import java.time.Duration;
 
 @Service
 @Getter
+
 public class S3Service {
 
+    private final S3Client s3Client;
     private final S3Presigner presigner;
     private final String bucket = "linkedmap";
 
-    public S3Service(S3Presigner presigner) {
+    public S3Service(S3Presigner presigner , S3Client s3Client) {
         this.presigner = presigner;
+        this.s3Client = s3Client;
     }
 
     /**
@@ -45,15 +54,52 @@ public class S3Service {
         return presignedRequest.url().toString();
     }
 
-//    public void copyRequestToS3(String key, String contentType) {
-//        CopyObjectRequest copyReq = CopyObjectRequest.builder()
-//                .sourceBucket(bucket)
-//                .sourceKey("rooms/temp-91f3a123/IMG_123.jpg")
-//                .destinationBucket("linkedmap")
-//                .destinationKey("rooms/42/IMG_123.jpg")
-//                .build();
-//        s3Client.copyObject(copyReq);
-//    }
+    public void moveImage(String fromKey, String toKey) {
+        copyImage(fromKey, toKey);
+        deleteImage(fromKey);
+    }
 
+    public void copyImage(String fromKey, String toKey) {
+        CopyObjectRequest copyRequest = CopyObjectRequest.builder()
+                .sourceBucket(bucket)
+                .sourceKey(fromKey)
+                .destinationBucket(bucket)
+                .destinationKey(toKey)
+                .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL)
+                .build();
+        s3Client.copyObject(copyRequest);
+    }
 
+    public void deleteImage(String key) {
+        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build();
+        s3Client.deleteObject(deleteRequest);
+    }
+
+    public String getKeyFromUrl(String fullUrl) {
+        String bucketUrlPrefix = "https://linkedmap.s3.ap-northeast-2.amazonaws.com/";
+        if (!fullUrl.startsWith(bucketUrlPrefix)) {
+            throw new IllegalArgumentException("잘못된 S3 URL입니다.");
+        }
+        return fullUrl.substring(bucketUrlPrefix.length());
+    }
+
+    public String upload(MultipartFile file, String key) {
+        try {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
+
+            return "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + key;
+
+        } catch (IOException e) {
+            throw new RuntimeException("S3 업로드 실패", e);
+        }
+    }
 }

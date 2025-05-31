@@ -20,13 +20,17 @@ import com.hyeonho.linkedmap.room.repository.RoomRepository;
 import com.hyeonho.linkedmap.marker.MarkerService;
 import com.hyeonho.linkedmap.roommember.RoomMemberRepository;
 import com.hyeonho.linkedmap.s3.S3Service;
-import io.micrometer.common.lang.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -39,13 +43,21 @@ public class RoomService {
     private final MarkerService markerService;
     private final S3Service s3Service;
 
+    // TODO: 추후 따로 뺴서 관리하도록 해야함
+    private String getExtension(String filename) {
+        if (filename == null || !filename.contains(".")) return "";
+        return filename.substring(filename.lastIndexOf("."));
+    }
+
     /**
      * 방 생성
      * 방 생성시, 생성이 완료되면 RoomMember에 invite상태로, OWNER 역할의 유저를 추가한다.
      * @param request
      * @return
      */
-    public Room createRoom(Long memberId, CreateRoomRequest request) {
+    public Room createRoom(Long memberId,
+                           @RequestPart("image") Optional<MultipartFile> file,
+                           @RequestPart("dto") CreateRoomRequest request) {
         try {
             Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
                     .orElseThrow(() -> new InvalidRequestException("없는 유저입니다."));
@@ -54,11 +66,10 @@ public class RoomService {
             Room room = new Room(member, request);
             saveRoom(room);
 
-//            if(request.getImageUrl() != null) {
-//                String key = request.getImageUrl();
-//                String dummyUrl = s3Service.generateUploadUrl(key,request.getContentType());
-//
-//            }
+            if(file.isPresent()) {
+                String url = this.getUploadImageUrl(file.get(), room);
+                room.uploadImage(url);
+            }
 
             // 방 생성후 RoomMember에 해당 유저 추가
             RoomMember roomMember = new RoomMember(room, member, InviteState.INVITE, RoomMemberRole.OWNER);
@@ -158,14 +169,8 @@ public class RoomService {
      * @param roomId
      * @return
      */
-    public Room deleteMyRoom(Long memberId, Long roomId, @Nullable RoomMember roomMember) {
-        Room room;
-
-        if(roomMember != null) {
-            room = roomMember.getRoom();
-        } else {
-            room = findRoomByRoomId(roomId);
-        }
+    public Room deleteMyRoom(Long memberId, Long roomId) {
+        Room room = findRoomByRoomId(roomId);
 
         if(!room.getCurrentOwner().getId().equals(memberId)) {
             throw new PermissionException("권한이 없습니다.");
@@ -192,10 +197,15 @@ public class RoomService {
         }
     }
 
-    public String updateRoom(Long memberId, RoomUpdateRequest req) {
+    public String updateRoom(Long memberId, Optional<MultipartFile> file, RoomUpdateRequest req) {
         Room room = findRoomByRoomId(req.getRoomId());
         if(!room.getCurrentOwner().getId().equals(memberId)) {
             throw new PermissionException("권한이 없습니다.");
+        }
+
+        if(file.isPresent()) {
+            String url = this.getUploadImageUrl(file.get(), room);
+            room.uploadImage(url);
         }
 
         room.update(req);
@@ -244,4 +254,11 @@ public class RoomService {
                 })
                 .toList();
     }
+
+    private String getUploadImageUrl(MultipartFile file, Room room) {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String s3Key = "rooms/" + room.getId() + "/" + timestamp + ".jpeg";
+        return  s3Service.upload(file, s3Key);
+    }
+
 }
