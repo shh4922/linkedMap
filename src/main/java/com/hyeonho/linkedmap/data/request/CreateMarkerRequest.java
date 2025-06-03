@@ -16,5 +16,4 @@ public class CreateMarkerRequest {
     private String address;
     private String roadAddress;
     private Long roomId;  // 카테고리 ID
-    private String imageUrl;  // Optional로 이미지 URL 처리
 }

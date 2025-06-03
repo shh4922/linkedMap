@@ -123,6 +123,10 @@ public class RoomService {
      */
     public RoomDetailDTO getRoomDetail(Long roomId) {
         List<RoomMember> roomMemberList = roomMemberRepository.getRoomMemberListByRoomId(roomId, InviteState.INVITE);
+        if(roomMemberList.isEmpty()) {
+            throw new InvalidRequestException("해당 방에 속한 유저가 없습니다.");
+        }
+
         Long markerCount = markerService.getMarkerCountByRoomId(roomId);
 
 

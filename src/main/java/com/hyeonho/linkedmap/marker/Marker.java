@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -51,7 +52,7 @@ public class Marker {
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "room_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Room room;
 
     @Column(name = "created_at", updatable = false)
@@ -64,7 +65,7 @@ public class Marker {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Marker(CreateMarkerRequest request, Member member, Room room) {
+    public Marker(CreateMarkerRequest request, Member member, Room room, String imageUrl) {
         this.lat = request.getLat();
         this.lng = request.getLng();
         this.title = request.getTitle();
@@ -72,19 +73,13 @@ public class Marker {
         this.storeType = request.getStoreType();
         this.address = request.getAddress();
         this.roadAddress = request.getRoadAddress();
-        this.imageUrl = request.getImageUrl();
+        this.imageUrl = imageUrl;
         this.member = member;
         this.room = room;
     }
 
 
     public void update(UpdateMarkerRequest req) {
-        if (req.getLat() != null) {
-            this.lat = req.getLat();
-        }
-        if (req.getLng() != null) {
-            this.lng = req.getLng();
-        }
         if (req.getTitle() != null) {
             this.title = req.getTitle();
         }
@@ -94,15 +89,11 @@ public class Marker {
         if (req.getStoreType() != null) {
             this.storeType = req.getStoreType();
         }
-        if (req.getAddress() != null) {
-            this.address = req.getAddress();
-        }
-        if (req.getRoadAddress() != null) {
-            this.roadAddress = req.getRoadAddress();
-        }
-        if (req.getImageUrl() != null) {
-            this.imageUrl = req.getImageUrl();
-        }
+
+    }
+
+    public void uploadImage(String url) {
+        this.imageUrl = url;
     }
 
     @PrePersist

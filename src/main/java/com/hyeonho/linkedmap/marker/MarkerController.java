@@ -9,8 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/api/v1")
@@ -26,8 +28,11 @@ public class MarkerController {
      * @return
      */
     @PostMapping("/marker/create")
-    public ResponseEntity<DefaultResponse<CreateMarkerDTO>> createMarker(@AuthenticationPrincipal Long memberId, @RequestBody CreateMarkerRequest req) {
-        CreateMarkerDTO markerDTO = markerService.createMarker(req,memberId);
+    public ResponseEntity<DefaultResponse<CreateMarkerDTO>> createMarker(@AuthenticationPrincipal Long memberId,
+                                                                         @RequestPart("dto") CreateMarkerRequest req,
+                                                                         @RequestPart("image")Optional<MultipartFile> file
+    ) {
+        CreateMarkerDTO markerDTO = markerService.createMarker(memberId, req, file);
         return ResponseEntity.ok(DefaultResponse.success(markerDTO));
     }
 
@@ -38,8 +43,11 @@ public class MarkerController {
     }
 
     @PutMapping("/marker/update")
-    public ResponseEntity<DefaultResponse<CreateMarkerDTO>> updateMarker(@AuthenticationPrincipal Long memberId, @RequestBody UpdateMarkerRequest req) {
-        CreateMarkerDTO markerDTO = markerService.updateMarker(memberId, req);
+    public ResponseEntity<DefaultResponse<CreateMarkerDTO>> updateMarker(@AuthenticationPrincipal Long memberId,
+                                                                         @RequestPart("dto") UpdateMarkerRequest req,
+                                                                         @RequestPart("image")Optional<MultipartFile> file
+    ) {
+        CreateMarkerDTO markerDTO = markerService.updateMarker(memberId, req, file);
         return ResponseEntity.ok(DefaultResponse.success(markerDTO));
     }
 

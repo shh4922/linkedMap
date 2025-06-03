@@ -16,11 +16,16 @@ import com.hyeonho.linkedmap.room.entity.Room;
 import com.hyeonho.linkedmap.room.repository.RoomRepository;
 import com.hyeonho.linkedmap.roommember.RoomMember;
 import com.hyeonho.linkedmap.roommember.RoomMemberRepository;
+import com.hyeonho.linkedmap.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +38,7 @@ public class MarkerService {
     private final RoomMemberRepository roomMemberRepository;
     private final MemberRepository memberRepository;
     private final InviteRepository inviteRepository;
+    private final S3Service s3Service;
 
     /**
      * 해당 유저가 카테고리에 속해있는지 체크
@@ -41,7 +47,7 @@ public class MarkerService {
      * 유저가 권한이 있는지 체크 (ReadOnly x)
      *
      */
-    public CreateMarkerDTO createMarker(CreateMarkerRequest req, Long memberId) {
+    public CreateMarkerDTO createMarker( Long memberId, CreateMarkerRequest req, Optional<MultipartFile> file) {
        RoomMember roomMember = getRoomMemberByMemberIdAndRoomId(memberId, req.getRoomId());
 
        // 초대되지 않은 유저인 경우
@@ -61,10 +67,16 @@ public class MarkerService {
        Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
                .orElseThrow(() -> new InvalidRequestException("유저없음"));
 
+       String imageUrl = null;
+       if(file.isPresent()) {
+           imageUrl = this.getUploadImageUrl(file.get(), room);
+       }
+
        Marker marker = Marker.builder()
                .request(req)
                .member(member)
                .room(room)
+               .imageUrl(imageUrl)
                .build();
 
        Marker saveMarker = markerRepository.save(marker);
@@ -99,8 +111,8 @@ public class MarkerService {
     }
 
     @Transactional
-    public CreateMarkerDTO updateMarker(Long memberId, UpdateMarkerRequest req) {
-        Marker marker = findMarkerById(req.getId());
+    public CreateMarkerDTO updateMarker(Long memberId, UpdateMarkerRequest req, Optional<MultipartFile> file) {
+        Marker marker = findMarkerById(req.getMarkerId());
 
         Long creatorId = marker.getMember().getId();
 
@@ -108,6 +120,10 @@ public class MarkerService {
 
         if(!isPermission) { throw new PermissionException("권한이 없습니다");}
 
+        if(file.isPresent()) {
+            String imageUrl = this.getUploadImageUrl(file.get(), marker.getRoom());
+            marker.uploadImage(imageUrl);
+        }
         marker.update(req);
 
         return CreateMarkerDTO.from(marker);
@@ -137,47 +153,37 @@ public class MarkerService {
     }
 
 
-    /** 카테고리 유저가 해당 카테고리에 속해있는지 체크
-     * 카테고리 유저가 삭제된 상태인지 체크
-     * 카테고리가 Active 상태인지 체크
-     * */
-    private boolean checkMarkerPermission(Long memberId, Long creatorId, Long roomId) {
+
+    /**
+     * @param myId 방 유저의 아이디
+     * @param creatorId 마커를 생성한 유저의 아이디
+     * @param roomId 마커가 속한 방의 아이디
+     * @return true: 권한 있음, false: 권한 없음
+     */
+    private boolean checkMarkerPermission(Long myId, Long creatorId, Long roomId) {
         // 내가 해당 방 소속인지 체크
-        RoomMember me = getRoomMemberByMemberIdAndRoomId(memberId, roomId);
+        RoomMember me = getRoomMemberByMemberIdAndRoomId(myId, roomId);
 
         // 생성자가 해당방 소속인지 체크
         RoomMember creator = getRoomMemberByMemberIdAndRoomId(creatorId, roomId);
 
         RoomMemberRole myPermission = me.getRoomMemberRole();
 
+        // 내가 마커 생성자인 경우 경우 true
+        if(myId.equals(creatorId)) return true;
+
         // 내가 방장인 경우 true
-        if(myPermission.equals(RoomMemberRole.OWNER)) {
-            return true;
-        }
-
-        // 내가 생성자인 경우 true
-        if(me.getMember().getId().equals(creator.getMember().getId())) {
-            return true;
-        }
-
-        // 내 권한이 readOnly 인 경우 false
-        if(!myPermission.equals(RoomMemberRole.MANAGER)) {
-            return false;
-        }
+        if(myPermission.equals(RoomMemberRole.OWNER)) return true;
 
         // 방장이 만든경우 false
-        if(creator.getRoomMemberRole().equals(RoomMemberRole.OWNER)) {
-            return false;
-        }
+        if(creator.getRoomMemberRole().equals(RoomMemberRole.OWNER))  return false;
 
-        // 같은 매니저의 경우 필터링
-        if(creator.getRoomMemberRole().equals(RoomMemberRole.MANAGER)) {
-            return false;
-        }
+        // 나는 매니저, 일반유저, readOnly 인 경우 true
+        if(myPermission.equals(RoomMemberRole.MANAGER) &&
+                (creator.getRoomMemberRole().equals(RoomMemberRole.USER)|| creator.getRoomMemberRole().equals(RoomMemberRole.READ_ONLY))
+        ) return true;
 
-        // 나는 매니저이고, 생성자는 일반유저나, readOnly 인 경우 필터링
         return true;
-
     }
 
 
@@ -190,4 +196,11 @@ public class MarkerService {
         return roomMemberRepository.getRoomMemberByMemberIdAndRoomId(memberId, roomId, RoomState.ACTIVE)
                 .orElseThrow(() -> new InvalidRequestException("해당 카테고리유저를 찾을수 없습니다."));
     }
+
+    private String getUploadImageUrl(MultipartFile file, Room room) {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String s3Key = "markers/" + room.getId() + "/" + timestamp + ".jpeg";
+        return  s3Service.upload(file, s3Key);
+    }
+
 }

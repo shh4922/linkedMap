@@ -6,7 +6,6 @@ import com.hyeonho.linkedmap.room.category.RoomDetailDTO;
 import com.hyeonho.linkedmap.room.category.RoomListDTO;
 import com.hyeonho.linkedmap.data.request.room.RoomUpdateRequest;
 import com.hyeonho.linkedmap.data.request.room.CreateRoomRequest;
-import com.hyeonho.linkedmap.data.request.room.DeleteRoomRequest;
 import com.hyeonho.linkedmap.room.entity.Room;
 import com.hyeonho.linkedmap.roommember.RoomMember;
 import com.hyeonho.linkedmap.invite.InviteState;
@@ -133,9 +132,9 @@ public class RoomController {
      * @return
      */
     @PutMapping("/room/update")
-    public ResponseEntity<DefaultResponse<String>> updateCategory(@AuthenticationPrincipal Long memberId,
-                                                                  @RequestPart("image") Optional<MultipartFile> file,
-                                                                  @RequestPart("dto") RoomUpdateRequest request) {
+    public ResponseEntity<DefaultResponse<String>> updateRoom(@AuthenticationPrincipal Long memberId,
+                                                              @RequestPart("image") Optional<MultipartFile> file,
+                                                              @RequestPart("dto") RoomUpdateRequest request) {
         return ResponseEntity.ok(DefaultResponse.success(roomService.updateRoom(memberId, file, request)));
     }
 
