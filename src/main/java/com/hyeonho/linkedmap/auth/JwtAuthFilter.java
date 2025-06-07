@@ -1,5 +1,6 @@
 package com.hyeonho.linkedmap.auth;
 
+import com.hyeonho.linkedmap.enumlist.Role;
 import com.hyeonho.linkedmap.member.Member;
 import com.hyeonho.linkedmap.member.MemberService;
 import jakarta.servlet.FilterChain;
@@ -25,6 +26,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JWTProvider jwtProvider;
     private final MemberService memberService;
     private static final Logger log = LoggerFactory.getLogger(JwtAuthFilter.class);
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
@@ -36,6 +38,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
         String username = null;
+        String role = null;
+
         log.info("JwtAuthFilter :{}", request.getRequestURL());
 
         if (request.getRequestURI().startsWith("/api/v1/login") ||
@@ -51,6 +55,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 //            log.info("token :{}",token);
 //            log.info("token2 :{}",jwtToken);
             username = jwtProvider.getJtiFromToken(token);
+            role = jwtProvider.getRoleFromToken(token);
         }
 
         /**
@@ -66,7 +71,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
          */
         if(username != null && !username.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
             log.info("뭐임시발", SecurityContextHolder.getContext());
-            SecurityContextHolder.getContext().setAuthentication(getUserAuth(username));
+            SecurityContextHolder.getContext().setAuthentication(getUserAuth(username, role));
         }
         log.info("요청 URL: {}", request.getRequestURI());
 
@@ -78,14 +83,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      * 비밀번호는 딱히 저장안해도 된다고함, user정보랑, 권한만 저장하면 된다고 함
      * @return 사용자 UsernamePasswordAuthenticationToken
      */
-    private UsernamePasswordAuthenticationToken getUserAuth(String memberId) {
+    private UsernamePasswordAuthenticationToken getUserAuth(String memberId, String role) {
         Long id = Long.parseLong(memberId);
-        Member userInfo = memberService.findMemberById(id);
 
         return new UsernamePasswordAuthenticationToken(
-                userInfo.getId(),
-                userInfo.getPassword(),
-                Collections.singleton(new SimpleGrantedAuthority(userInfo.getRole().value()))
+                id,
+                null,
+                Collections.singleton(new SimpleGrantedAuthority(role))
         );
     }
 }

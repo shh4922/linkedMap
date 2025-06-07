@@ -2,6 +2,7 @@ package com.hyeonho.linkedmap.member;
 
 import com.hyeonho.linkedmap.auth.JWTProvider;
 import com.hyeonho.linkedmap.auth.RefreshToken;
+import com.hyeonho.linkedmap.invite.InviteState;
 import com.hyeonho.linkedmap.member.member.LoginResponseDTO;
 import com.hyeonho.linkedmap.member.member.MemberInfoDTO;
 import com.hyeonho.linkedmap.member.member.MemberUpdateDto;
@@ -9,28 +10,30 @@ import com.hyeonho.linkedmap.member.member.RegisterDTO;
 import com.hyeonho.linkedmap.data.request.LoginRequestDTO;
 import com.hyeonho.linkedmap.data.request.MemberUpdateRequest;
 import com.hyeonho.linkedmap.data.request.RegisterRequest;
-import com.hyeonho.linkedmap.roommember.RoomMember;
-import com.hyeonho.linkedmap.roommember.RoomMemberRole;
-import com.hyeonho.linkedmap.invite.InviteState;
+import com.hyeonho.linkedmap.room.RoomState;
 import com.hyeonho.linkedmap.enumlist.Role;
 import com.hyeonho.linkedmap.error.DatabaseException;
 import com.hyeonho.linkedmap.error.DuplicateMemberException;
 import com.hyeonho.linkedmap.error.InvalidRequestException;
 import com.hyeonho.linkedmap.room.service.RoomService;
+import com.hyeonho.linkedmap.roommember.RoomMemberRepository;
+import com.hyeonho.linkedmap.roommember.RoomMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class MemberService {
-    private final RoomService roomService;
+    private final RoomMemberRepository roomMemberRepository;
     private final MemberRepository memberRepository;
+
+    private final RoomService roomService;
+
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTProvider jwtProvider;
 
@@ -58,33 +61,17 @@ public class MemberService {
         }
     }
 
-    /** 내 정보 조회 */
-    public MemberInfoDTO getMyInfoById(Long id) {
-        Member member = findMemberById(id);
-
-        return MemberInfoDTO.builder()
-                .memberId(member.getId())
-                .email(member.getEmail())
-                .username(member.getUsername())
-                .role(member.getRole().name())
-                .profileImage(member.getProfileImage())
-                .createdAt(member.getCreatedAt())
-                .build();
+    public MemberInfoDTO getMemberInfo(Long memberId) {
+        Member member = findMemberById(memberId);
+        return MemberInfoDTO.fromEntity(member);
     }
 
     /** 특정 유저 정보 조회 */
-    public MemberInfoDTO getUserInfoByEmail(String email) {
+    public MemberInfoDTO getMemberInfoByEmail(String email) {
         Member member = findByEmail(email)
-                .orElseThrow(() -> new InvalidRequestException("해당 계정 없음"));
+                .orElseThrow(() -> new InvalidRequestException("해당 유저 없음"));
 
-        return MemberInfoDTO.builder()
-                .memberId(member.getId())
-                .email(member.getEmail())
-                .username(member.getUsername())
-                .profileImage(member.getProfileImage())
-                .createdAt(member.getCreatedAt())
-                .role(member.getRole().name())
-                .build();
+        return MemberInfoDTO.fromEntity(member);
     }
 
 
@@ -105,7 +92,7 @@ public class MemberService {
         }
 
         // jwt 토큰 생성
-        String accessToken = jwtProvider.generateAccessToken(userInfo.getId());
+        String accessToken = jwtProvider.generateAccessToken(userInfo.getId(), userInfo.getRole());
 
         // 기존에 가지고 있는 사용자의 refresh token 제거
         RefreshToken.removeUserRefreshToken(userInfo.getId());
@@ -121,51 +108,35 @@ public class MemberService {
                     .build();
     }
 
-    public String logout(Long id) {
-        Member userInfo = findMemberById(id);
-        if(RefreshToken.removeUserRefreshToken(userInfo.getId())) {
+    public String logout(Long memberId) {
+        if(RefreshToken.removeUserRefreshToken(memberId)) {
             return "0";
         }
         return "-1";
     }
 
     /** 내정보 업데이트 */
-    public MemberUpdateDto updateMemberInfo(Long id, MemberUpdateRequest request) {
-        Member member = findMemberById(id);
+    public MemberUpdateDto updateMemberInfo(Long memberId, MemberUpdateRequest request) {
+        Member member = findMemberById(memberId);
         member.update(request);
-
-        return MemberUpdateDto.builder()
-                .memberId(member.getId())
-                .email(member.getEmail())
-                .username(member.getUsername())
-                .profileImage(member.getProfileImage())
-                .createdAt(member.getCreatedAt())
-                .updateAt(member.getUpdatedAt())
-                .build();
+        return MemberUpdateDto.fromEntity(member);
     }
 
-    /** 회원탈퇴 */
-    public Member deleteMember(Long id) {
-
-        Member member = findMemberById(id);
-
-        /** 맴버 delete 상태 변경*/
+    /** 회원탈퇴
+     * 내가 속해있는 모든 방의 inviteState를 GETOUT으로 변경
+     * 내가 방장인 방은 roomState를 DELETE로 변경
+     * update Room set roomState = DELETE where id in (내가 방장인 방들의 id)
+     * */
+    public Member deleteMember(Long memberId) {
+        // 내 정보 삭제
+        Member member = findMemberById(memberId);
         member.delete();
 
-        /** 내가 속한 카테고리 조회*/
-        List<RoomMember> includeRoomList = roomService.getRoomMemberListByMemberId(member.getId(), InviteState.INVITE);
+        // 내가 만든 방 삭제
+        roomService.deleteRoomByMemberId(memberId);
 
-        /**
-         * 일단 내가속한 방들의 inviteState를 GETOUT으로 모두 변경
-         * 그런데, 내가 방장이면 RoomState를 DELETE로 업데이트
-         */
-        includeRoomList.forEach(roomMember -> {
-            if(roomMember.getRoomMemberRole() == RoomMemberRole.OWNER) {
-                roomService.deleteMyRoom(member.getId(), roomMember.getRoom().getId());
-            } else { // 다른 카테고리에 속한거라면 나가기 처리
-                roomService.getOutRoom(member.getId(), roomMember.getRoom().getId());
-            }
-        });
+        // 내가 속한 모든 방 나가기
+        roomMemberRepository.updateAllInviteStatusByMemberId(InviteState.GETOUT,memberId);
 
         return member;
     }
@@ -175,8 +146,6 @@ public class MemberService {
      * 옵셔널을 리턴하도록 해야함.
      * 회원가입할때 null 이면 가입이 가능하도록 만들고, null이 아니면 중복된 계정으로 함.
      * 저기서 써야해서 리턴값이 optional 이도록 해야함
-     * @param email
-     * @return
      */
     public Optional<Member> findByEmail(String email) {
         return memberRepository.findByEmailAndDeletedAtIsNull(email);
@@ -187,9 +156,5 @@ public class MemberService {
                 .orElseThrow(() -> new InvalidRequestException("해당 계정 없음"));
     }
 
-
-
-//    public LoginResponseDTO refreshToken(String refreshToken) {
-//
-//    }
 }
+

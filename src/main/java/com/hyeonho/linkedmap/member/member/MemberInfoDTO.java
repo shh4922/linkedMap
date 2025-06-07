@@ -1,9 +1,8 @@
 package com.hyeonho.linkedmap.member.member;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.hyeonho.linkedmap.enumlist.Role;
+import com.hyeonho.linkedmap.member.Member;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -27,4 +26,17 @@ public class MemberInfoDTO {
         this.profileImage = profileImage;
         this.createdAt = createdAt;
     }
+
+    public static MemberInfoDTO fromEntity(Member member) {
+        return MemberInfoDTO.builder()
+                .email(member.getEmail())
+                .username(member.getUsername())
+                .memberId(member.getId())
+                .role(member.getRole().name())
+                .profileImage(member.getProfileImage())
+                .createdAt(member.getCreatedAt())
+                .build();
+    }
+
+
 }

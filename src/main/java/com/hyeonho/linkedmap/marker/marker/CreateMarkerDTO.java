@@ -2,6 +2,7 @@ package com.hyeonho.linkedmap.marker.marker;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hyeonho.linkedmap.marker.Marker;
+import com.hyeonho.linkedmap.roommember.RoomMemberRole;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -21,16 +22,57 @@ public class CreateMarkerDTO {
     private String storeType;
 
     private String imageUrl;
+    private Long creatorId; // 만든사람 id
     private String creatorEmail;    // 만든사람 email
     private String creatorName;     // 만든사람 이름
-    private String creatorRole;     // 만든사람 권한
+    private RoomMemberRole creatorRole;     // 만든사람 권한
     private Long roomId;
+    private String roomName;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
+
+
+    public CreateMarkerDTO(
+            Long id,
+            BigDecimal lat,
+            BigDecimal lng,
+            String title,
+            String description,
+            String address,
+            String roadAddress,
+            String storeType,
+            String imageUrl,
+            Long creatorId,
+            String creatorEmail,
+            String creatorName,
+            Long roomId,
+            String roomName,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            RoomMemberRole creatorRole
+    ) {
+        this.id = id;
+        this.lat = lat;
+        this.lng = lng;
+        this.title = title;
+        this.description = description;
+        this.address = address;
+        this.roadAddress = roadAddress;
+        this.storeType = storeType;
+        this.imageUrl = imageUrl;
+        this.creatorId = creatorId;
+        this.creatorEmail = creatorEmail;
+        this.creatorName = creatorName;
+        this.roomId = roomId;
+        this.roomName = roomName;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.creatorRole = creatorRole;
+    }
 
     @Builder
     public CreateMarkerDTO(Long id, BigDecimal lat, BigDecimal lng, String title, String description, String address, String roadAddress, String storeType, String imageUrl, String creatorEmail, String creatorName, Long roomId, LocalDateTime createdAt, LocalDateTime updatedAt, String creatorRole) {
@@ -48,7 +90,7 @@ public class CreateMarkerDTO {
         this.roomId = roomId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.creatorRole = creatorRole;
+//        this.creatorRole = creatorRole;
     }
 
     public static CreateMarkerDTO from(Marker marker) {

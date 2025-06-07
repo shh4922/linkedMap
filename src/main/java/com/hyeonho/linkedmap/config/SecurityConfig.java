@@ -6,6 +6,7 @@ import com.hyeonho.linkedmap.auth.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,12 +29,6 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 
-    // 이건 또 뭐임?
-//    @Bean
-//    MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
-//        return new MvcRequestMatcher.Builder(introspector);
-//    }
-
     @Bean
     public SecurityFilterChain config(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
 //        MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
@@ -49,6 +44,8 @@ public class SecurityConfig {
         };
 
         http.authorizeHttpRequests(authorize -> authorize
+                // options 요청 허용 (firefox 에서 preflight 요청을 보냄)
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(permitAllWhiteList).permitAll()
                 // 그 외 요청 체크
                 .anyRequest().authenticated()

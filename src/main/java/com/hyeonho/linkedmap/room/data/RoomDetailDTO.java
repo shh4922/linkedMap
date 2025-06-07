@@ -1,20 +1,18 @@
-package com.hyeonho.linkedmap.room.category;
-
+package com.hyeonho.linkedmap.room.data;
 
 import com.hyeonho.linkedmap.member.member.RoomMemberDTO;
-import lombok.Builder;
+import com.hyeonho.linkedmap.roommember.RoomMemberRole;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-// TODO: CurrentRoomOwnerId 추가해야함.
 
 @Getter
 public class RoomDetailDTO {
     private Long roomId;                    // 방의 Id
     private String roomName;                // 방 명
     private String roomDescription;         // 방 설명
+    private RoomMemberRole myRole;                  // 내 권한 (방장, 일반유저 등)
     private Long currentRoomOwnerId;        // 방장 Id
     private String currentRoomOwnerName;    // 방장 이름
     private String currentRoomOwnerEmail;   // 방장 이메일
@@ -22,28 +20,31 @@ public class RoomDetailDTO {
     private String createUserName;          // 생성자 이름
     private LocalDateTime createdAt;        // 방 생성일
     private String imageUrl;                // 커버 이미지
+    private Long markerCount;                // 방의 있는 마커수
 
-    private List<RoomMemberDTO> memberList;    // 카테고리에 속한 유저
-    private int markerCount;                // 카테고리에 있는 마커수
+    private List<RoomMemberDTO> memberList;
 
-    @Builder
     public RoomDetailDTO(
             Long roomId,
             String roomName,
             String roomDescription,
+            String imageUrl,
+            RoomMemberRole myRole,
+
             Long currentRoomOwnerId,
             String currentRoomOwnerName,
             String currentRoomOwnerEmail,
             String createUserEmail,
             String createUserName,
+
             LocalDateTime createdAt,
-            String imageUrl,
-            List<RoomMemberDTO> memberList,
-            int markerCount
+
+            Long markerCount
     ) {
         this.roomId = roomId;
         this.roomName = roomName;
         this.roomDescription = roomDescription;
+        this.myRole = myRole;
         this.currentRoomOwnerId = currentRoomOwnerId;
         this.currentRoomOwnerName = currentRoomOwnerName;
         this.currentRoomOwnerEmail = currentRoomOwnerEmail;
@@ -51,7 +52,10 @@ public class RoomDetailDTO {
         this.createUserName = createUserName;
         this.createdAt = createdAt;
         this.imageUrl = imageUrl;
-        this.memberList = memberList;
         this.markerCount = markerCount;
+    }
+
+    public void setMembers(List<RoomMemberDTO> memberList) {
+        this.memberList = memberList;
     }
 }

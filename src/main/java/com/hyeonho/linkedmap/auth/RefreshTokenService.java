@@ -1,5 +1,6 @@
 package com.hyeonho.linkedmap.auth;
 
+import com.hyeonho.linkedmap.enumlist.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +19,9 @@ public class RefreshTokenService{
         // refresh token id 조회
         var id = RefreshToken.getUserIdByRefreshToken(refreshToken);
 
+        // TODO: 여기 나중에 role도 가져와야함
         // 새로운 access token 생성
-        String newAccessToken = jwtProvider.generateAccessToken(id);
+        String newAccessToken = jwtProvider.generateAccessToken(id, Role.ROLE_USER);
 
         // 기존에 가지고 있는 사용자의 refresh token 제거
         RefreshToken.removeUserRefreshToken(id);

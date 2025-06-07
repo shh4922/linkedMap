@@ -1,6 +1,7 @@
 package com.hyeonho.linkedmap.member.member;
 
 import com.hyeonho.linkedmap.data.request.MemberUpdateRequest;
+import com.hyeonho.linkedmap.member.Member;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,5 +26,16 @@ public class MemberUpdateDto {
         this.profileImage = profileImage;
         this.createdAt = createdAt;
         this.updateAt = updateAt;
+    }
+
+    public static MemberUpdateDto fromEntity(Member member) {
+        return MemberUpdateDto.builder()
+                .memberId(member.getId())
+                .email(member.getEmail())
+                .username(member.getUsername())
+                .profileImage(member.getProfileImage())
+                .createdAt(member.getCreatedAt())
+                .updateAt(member.getUpdatedAt())
+                .build();
     }
 }

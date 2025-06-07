@@ -5,6 +5,7 @@ import com.hyeonho.linkedmap.data.request.roommember.GetRoomMemberRequest;
 import com.hyeonho.linkedmap.data.request.roommember.PatchRoomMemberPermissionRequest;
 import com.hyeonho.linkedmap.data.request.roommember.PostExpelledRoomMember;
 import com.hyeonho.linkedmap.error.InvalidRequestException;
+import com.hyeonho.linkedmap.room.RoomState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class RoomMemberController {
             throw new InvalidRequestException("파라미터가 비어있습니다.");
         }
 
-        RoomMember roomMember = roomMemberService.getRoomMember(request);
+        RoomMember roomMember = roomMemberService.getRoomMember(request.getMemberId(), request.getRoomId(), RoomState.ACTIVE);
         return ResponseEntity.ok(DefaultResponse.success(roomMember));
     }
 
@@ -37,6 +38,7 @@ public class RoomMemberController {
      */
     @PatchMapping("/roommember/update/permission")
     public ResponseEntity<DefaultResponse<String>> updateRoomMemberPermission(@AuthenticationPrincipal Long memberId, @RequestBody PatchRoomMemberPermissionRequest request) {
+        log.info("request {}",request);
         if(request.getPermission() == null || request.getPermission().isEmpty() || request.getRoomMemberId() == null || request.getRoomId() == null) {
             throw new InvalidRequestException("데이터가 비어있습니다.");
         }

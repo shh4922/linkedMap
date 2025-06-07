@@ -53,9 +53,13 @@ public class MemberController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<DefaultResponse<String>> logout(@AuthenticationPrincipal Long id) {
-        String res = memberService.logout(id);
-        return ResponseEntity.ok(DefaultResponse.success(res));
+    public ResponseEntity<DefaultResponse<String>> logout(@AuthenticationPrincipal Long memberId) {
+        String res = memberService.logout(memberId);
+        if(res == "0") {
+            return ResponseEntity.ok(DefaultResponse.success(res));
+        } else {
+            return ResponseEntity.ok(DefaultResponse.error(400, "로그아웃 실패"));
+        }
     }
 
     /**
@@ -64,8 +68,8 @@ public class MemberController {
      * @return 이메일, 이름, 역할 리턴
      */
     @GetMapping("/user/my")
-    public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMyInfo(@AuthenticationPrincipal Long id) {
-        return ResponseEntity.ok(DefaultResponse.success(memberService.getMyInfoById(id)));
+    public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMyInfo(@AuthenticationPrincipal Long memberId) {
+        return ResponseEntity.ok(DefaultResponse.success(memberService.getMemberInfo(memberId)));
     }
 
     /**
@@ -76,7 +80,7 @@ public class MemberController {
      */
     @GetMapping("/users/info/{email}")
     public ResponseEntity<DefaultResponse<MemberInfoDTO>> getMemberInfoByEmail(@PathVariable(value = "email") String email) {
-        return ResponseEntity.ok(DefaultResponse.success(memberService.getUserInfoByEmail(email)));
+        return ResponseEntity.ok(DefaultResponse.success(memberService.getMemberInfoByEmail(email)));
     }
 
     /**
@@ -86,8 +90,8 @@ public class MemberController {
      * @return
      */
     @PatchMapping("/user/info")
-    public ResponseEntity<DefaultResponse<MemberUpdateDto>> updateMemberInfo(@AuthenticationPrincipal Long id, MemberUpdateRequest request) {
-        return ResponseEntity.ok(DefaultResponse.success(memberService.updateMemberInfo(id, request)));
+    public ResponseEntity<DefaultResponse<MemberUpdateDto>> updateMemberInfo(@AuthenticationPrincipal Long memberId, MemberUpdateRequest request) {
+        return ResponseEntity.ok(DefaultResponse.success(memberService.updateMemberInfo(memberId, request)));
     }
 
     /**
@@ -99,9 +103,9 @@ public class MemberController {
     @DeleteMapping("/user/delete")
     public ResponseEntity<DefaultResponse<String>> deleteMember(@AuthenticationPrincipal Long memberId) {
 
-        Member member = memberService.deleteMember(memberId);
+        Member deleteMember = memberService.deleteMember(memberId);
 
-        if(member.getDeletedAt() != null) {
+        if(deleteMember.getDeletedAt() != null) {
             return ResponseEntity.ok(DefaultResponse.success("0"));
         }
 

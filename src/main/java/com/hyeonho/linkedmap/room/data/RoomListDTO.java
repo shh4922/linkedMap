@@ -1,8 +1,11 @@
-package com.hyeonho.linkedmap.room.category;
+package com.hyeonho.linkedmap.room.data;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hyeonho.linkedmap.invite.InviteState;
+import com.hyeonho.linkedmap.room.RoomState;
 import com.hyeonho.linkedmap.room.entity.Room;
 import com.hyeonho.linkedmap.roommember.RoomMember;
+import com.hyeonho.linkedmap.roommember.RoomMemberRole;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -77,6 +80,31 @@ public class RoomListDTO {
 
         this.roomState = roomState;
         this.inviteDate = inviteDate;
+    }
+
+    public RoomListDTO(Long id, Long roomId, String roomName, String roomDescription,
+                       Long currentOwnerId, String currentOwnerEmail, String currentOwnerName,
+                       String createUserEmail, String createUserName,
+                       RoomState roomState, InviteState inviteState, RoomMemberRole role,
+                       Long markerCount, Long memberCount) {
+        this.id = id;
+        this.roomId = roomId;
+        this.roomName = roomName;
+        this.roomDescription = roomDescription;
+
+        this.currentOwnerId = currentOwnerId;
+        this.currentOwnerEmail = currentOwnerEmail;
+        this.currentOwnerName = currentOwnerName;
+
+        this.createUserEmail = createUserEmail;
+        this.createUserName = createUserName;
+        this.roomState = roomState.name();
+
+        this.inviteState = inviteState.name();
+        this.role = role.name();
+
+        this.markerCount = markerCount.intValue();
+        this.memberCount = memberCount.intValue();
     }
 
     public static RoomListDTO fromEntityMyRoom(RoomMember roomMember) {

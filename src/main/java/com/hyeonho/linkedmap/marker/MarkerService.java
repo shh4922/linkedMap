@@ -1,5 +1,6 @@
 package com.hyeonho.linkedmap.marker;
 
+import com.hyeonho.linkedmap.helper.MemberValidationService;
 import com.hyeonho.linkedmap.marker.marker.CreateMarkerDTO;
 import com.hyeonho.linkedmap.data.request.CreateMarkerRequest;
 
@@ -36,8 +37,10 @@ public class MarkerService {
     private final MarkerRepository markerRepository;
     private final RoomRepository roomRepository;
     private final RoomMemberRepository roomMemberRepository;
-    private final MemberRepository memberRepository;
+    private final MemberValidationService memberValidationService;
+//    private final MemberRepository memberRepository;
     private final InviteRepository inviteRepository;
+    private final MarkerQueryRepository markerQueryRepository;
     private final S3Service s3Service;
 
     /**
@@ -64,8 +67,7 @@ public class MarkerService {
        Room room = roomRepository.findById(req.getRoomId())
                .orElseThrow(() -> new InvalidRequestException("존재하지 않는 방입니다"));
 
-       Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
-               .orElseThrow(() -> new InvalidRequestException("유저없음"));
+       Member member = memberValidationService.findMemberById(memberId);
 
        String imageUrl = null;
        if(file.isPresent()) {
@@ -88,26 +90,16 @@ public class MarkerService {
         return markerRepository.countByRoomIdAndDeletedAtIsNull(roomId);
     }
 
-    /**
-     * 방에 있는 마커리스트 조회
-     * @param memberId
-     * @param categoryId
-     * @return
-     */
-    public List<CreateMarkerDTO> getMarkerListByRoomId(Long memberId, Long categoryId) {
-        // 카테고리가 삭제되었으면 애초에 조회가 안됌
-        RoomMember roomMember = getRoomMemberByMemberIdAndRoomId(memberId, categoryId);
+    /** 방에 있는 마커리스트 조회 */
+    public List<CreateMarkerDTO> getMarkerListByRoomId(Long memberId, Long roomId) {
+        // 방이 삭제되었으면 애초에 조회가 안됌
+        RoomMember roomMember = getRoomMemberByMemberIdAndRoomId(memberId, roomId);
 
         // 해당 방 유저가 아닌경우. -> InviteState가 INVITE가 아닌경우
         if(!roomMember.getInviteState().equals(InviteState.INVITE)) {
             throw new PermissionException("권한이 없습니다");
         }
-
-        List<Marker> markerList = markerRepository.getMarkerList(categoryId);
-
-        return markerList.stream()
-                .map(CreateMarkerDTO::from)
-                .collect(Collectors.toList());
+        return markerQueryRepository.getMarkerList(memberId, roomId);
     }
 
     @Transactional

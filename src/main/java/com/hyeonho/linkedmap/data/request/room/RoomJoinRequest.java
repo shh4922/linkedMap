@@ -8,4 +8,5 @@ import java.util.UUID;
 public class RoomJoinRequest {
     private UUID inviteKey;
     private Long roomId;
+
 }

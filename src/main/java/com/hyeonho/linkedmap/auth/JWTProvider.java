@@ -1,5 +1,6 @@
 package com.hyeonho.linkedmap.auth;
 
+import com.hyeonho.linkedmap.enumlist.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -49,9 +50,12 @@ public class JWTProvider {
         return getClaimFromToken(token, Claims::getId);
     }
 
-//    public Long getUserIdFromToken(final String token) {
-//        return getClaimFromToken(token, Claims::getId);
-//    }
+    /**
+     * Claims에서 'role' 값을 가져오는 새로운 메서드 추가
+     */
+    public String getRoleFromToken(final String token) {
+        return getClaimFromToken(token, claims -> claims.get("role", String.class));
+    }
 
 
 
@@ -101,8 +105,10 @@ public class JWTProvider {
      * @param id token 생성 id
      * @return access token
      */
-    public String generateAccessToken(final String id) {
-        return generateAccessToken(id, new HashMap<>());
+    public String generateAccessToken(final String id, Role role) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
+        return generateAccessToken(id, claims);
     }
 
     /**
@@ -111,28 +117,18 @@ public class JWTProvider {
      * @param id token 생성 id
      * @return access token
      */
-    public String generateAccessToken(final long id) {
-        return generateAccessToken(String.valueOf(id), new HashMap<>());
+    public String generateAccessToken(final long id, Role role) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
+        return generateAccessToken(String.valueOf(id), role);
     }
 
-    /**
-     * access token 생성
-     *
-     * @param id token 생성 id
-     * @param claims token 생성 claims
-     * @return access token
-     */
+
     public String generateAccessToken(final String id, final Map<String, Object> claims) {
         return doGenerateAccessToken(id, claims);
     }
 
-    /**
-     * JWT access token 생성
-     *
-     * @param id token 생성 id
-     * @param claims token 생성 claims
-     * @return access token
-     */
+
     private String doGenerateAccessToken(final String id, final Map<String, Object> claims) {
         return Jwts.builder()
                 .setClaims(claims)

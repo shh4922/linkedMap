@@ -2,17 +2,14 @@ package com.hyeonho.linkedmap.room.controller;
 
 import com.hyeonho.linkedmap.auth.JWTProvider;
 import com.hyeonho.linkedmap.data.DefaultResponse;
-import com.hyeonho.linkedmap.room.category.RoomDetailDTO;
-import com.hyeonho.linkedmap.room.category.RoomListDTO;
+import com.hyeonho.linkedmap.room.data.RoomDetailDTO;
+import com.hyeonho.linkedmap.room.data.RoomListDTO;
 import com.hyeonho.linkedmap.data.request.room.RoomUpdateRequest;
 import com.hyeonho.linkedmap.data.request.room.CreateRoomRequest;
 import com.hyeonho.linkedmap.room.entity.Room;
-import com.hyeonho.linkedmap.roommember.RoomMember;
-import com.hyeonho.linkedmap.invite.InviteState;
 import com.hyeonho.linkedmap.error.InvalidRequestException;
 import com.hyeonho.linkedmap.roommember.RoomMemberRepository;
 import com.hyeonho.linkedmap.room.service.RoomService;
-import com.hyeonho.linkedmap.marker.MarkerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -28,28 +25,21 @@ import java.util.*;
 @RequiredArgsConstructor
 public class RoomController {
     private final RoomService roomService;
-    private final MarkerService markerService;
     private final JWTProvider jwtProvider;
     private final RoomMemberRepository roomMemberRepository;
 
 
     /** 방 생성 */
     @PostMapping("/room/create")
-    public ResponseEntity<DefaultResponse<String>> createRoom(@AuthenticationPrincipal Long id,
+    public ResponseEntity<DefaultResponse<String>> createRoom(@AuthenticationPrincipal Long memberId,
                                                               @RequestPart("image") Optional<MultipartFile> file,
                                                               @RequestPart("dto") CreateRoomRequest request) {
-
         if(request.getRoomName().isEmpty()) {
             return ResponseEntity.ok(DefaultResponse.error(400,"필수항목이 비어있습니다."));
         }
 
-        Room room = roomService.createRoom(id,file, request);
-        if(room != null) {
-            return ResponseEntity.ok(DefaultResponse.success("1"));
-        }
-
-        return ResponseEntity.badRequest()
-                .body(DefaultResponse.error(400, "방 생성 실패"));
+        Room room = roomService.createRoom(memberId,file, request);
+        return ResponseEntity.ok(DefaultResponse.success("1"));
     }
 
     /**
@@ -86,10 +76,10 @@ public class RoomController {
      * @return
      */
     @GetMapping("/room/detail/{roomId}")
-    public ResponseEntity<DefaultResponse<RoomDetailDTO>> getRoomDetail(@PathVariable("roomId") Long roomId) {
+    public ResponseEntity<DefaultResponse<RoomDetailDTO>> getRoomDetail(@AuthenticationPrincipal Long memberId, @PathVariable("roomId") Long roomId) {
         if(roomId == null) { throw new InvalidRequestException("해당 방의 정보가 없습니다"); }
 
-        return ResponseEntity.ok(DefaultResponse.success(roomService.getRoomDetail(roomId)));
+        return ResponseEntity.ok(DefaultResponse.success(roomService.getRoomDetail(memberId, roomId)));
     }
 
 
@@ -103,7 +93,8 @@ public class RoomController {
     public ResponseEntity<DefaultResponse<String>> deleteRoom(@AuthenticationPrincipal Long memberId, @PathVariable("roomId") Long roomId) {
         if(roomId == null) { throw new InvalidRequestException("방 아이디값 없음"); }
 
-        Room room = roomService.deleteMyRoom(memberId, roomId);
+        Room room = roomService.deleteRoomByRoomId(memberId, roomId);
+
         if(room.getDeletedAt() == null) {
             return ResponseEntity.ok(DefaultResponse.error(400,"삭제실패"));
         }
@@ -117,7 +108,7 @@ public class RoomController {
     public ResponseEntity<DefaultResponse<String>> getOutRoom(@AuthenticationPrincipal Long memberId, @PathVariable("roomId") Long roomId) {
         if(roomId == null) { throw new InvalidRequestException("방 아이디값 없음");}
 
-        int result = roomService.getOutRoom(memberId,roomId);
+        int result = roomService.getOutRoomByMemberIdAndRoomId(List.of(memberId),roomId);
         if(result == 0) {
             return ResponseEntity.ok(DefaultResponse.error(400,"실패"));
         }
@@ -139,13 +130,4 @@ public class RoomController {
     }
 
 
-
-    /**
-     * 특정 유저가 속한 RoomMember 리스트를 리턴합니다
-     *
-     * @return
-     */
-    private List<RoomMember> getIncludeRoomMemberListByEmail(Long memberId) {
-        return roomService.getRoomMemberListByMemberId(memberId, InviteState.INVITE);
-    }
 }
