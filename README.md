@@ -1,3 +1,7 @@
-### 신현호의 스프링 도전기 ㅋㅋ
+### linkedmap 백엔드
 ---
-아직 아무것도몰라서 테스트코드 작성하면서 노는중임
+* springboot3
+* security
+* JPA, QueryDSL
+* S3
+* mariaDB
